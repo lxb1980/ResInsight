@@ -82,6 +82,22 @@ void RivWellPathsPartMgr::appendStaticFracturePartsToModel( cvf::ModelBasicList*
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
+void RivWellPathsPartMgr::appendStaticFractureModelPartsToModel( cvf::ModelBasicList*    model,
+                                                                 const cvf::BoundingBox& wellPathClipBoundingBox )
+{
+    if ( !isWellPathVisible() ) return;
+
+    createPartManagersIfRequired();
+
+    for ( auto& partMgr : m_wellPathsPartMgrs )
+    {
+        partMgr->appendStaticFractureModelPartsToModel( model, wellPathClipBoundingBox );
+    }
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
 void RivWellPathsPartMgr::appendDynamicGeometryPartsToModel( cvf::ModelBasicList*              model,
                                                              size_t                            timeStepIndex,
                                                              const caf::DisplayCoordTransform* displayCoordTransform,

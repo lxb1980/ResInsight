@@ -32,7 +32,7 @@ RimFractureModelCollection::RimFractureModelCollection( void )
 {
     CAF_PDM_InitObject( "Fracture Models", "", "", "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_fractureModels, "FractureModels", "Fracture Models", "", "", "" );
+    CAF_PDM_InitFieldNoDefault( &m_fractureModels, "FractureModels", "", "", "", "" );
     m_fractureModels.uiCapability()->setUiHidden( true );
 
     setName( "Fracture Models" );

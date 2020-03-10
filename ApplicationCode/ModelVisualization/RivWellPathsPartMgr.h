@@ -64,6 +64,8 @@ public:
                                             const cvf::BoundingBox&           wellPathClipBoundingBox );
 
     void appendStaticFracturePartsToModel( cvf::ModelBasicList* model, const cvf::BoundingBox& wellPathClipBoundingBox );
+    void appendStaticFractureModelPartsToModel( cvf::ModelBasicList*    model,
+                                                const cvf::BoundingBox& wellPathClipBoundingBox );
 
 private:
     void clearGeometryCache();

@@ -583,6 +583,8 @@ void RimEclipseView::onCreateDisplayModel()
 
     m_wellPathsPartManager->appendStaticFracturePartsToModel( m_wellPathPipeVizModel.p(),
                                                               currentActiveCellInfo()->geometryBoundingBox() );
+    m_wellPathsPartManager->appendStaticFractureModelPartsToModel( m_wellPathPipeVizModel.p(),
+                                                                   currentActiveCellInfo()->geometryBoundingBox() );
     m_wellPathPipeVizModel->updateBoundingBoxesRecursive();
     nativeOrOverrideViewer()->addStaticModelOnce( m_wellPathPipeVizModel.p(), isUsingOverrideViewer() );
 

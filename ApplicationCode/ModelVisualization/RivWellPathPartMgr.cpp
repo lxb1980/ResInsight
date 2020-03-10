@@ -35,6 +35,8 @@
 #include "RimFishboneWellPathCollection.h"
 #include "RimFishbonesCollection.h"
 #include "RimFishbonesMultipleSubs.h"
+#include "RimFractureModel.h"
+#include "RimFractureModelCollection.h"
 #include "RimPerforationCollection.h"
 #include "RimPerforationInterval.h"
 #include "RimRegularLegendConfig.h"
@@ -54,6 +56,7 @@
 
 #include "Riv3dWellLogPlanePartMgr.h"
 #include "RivFishbonesSubsPartMgr.h"
+#include "RivFractureModelPartMgr.h"
 #include "RivObjectSourceInfo.h"
 #include "RivPartPriority.h"
 #include "RivPipeGeometryGenerator.h"
@@ -145,6 +148,30 @@ void RivWellPathPartMgr::appendStaticFracturePartsToModel( cvf::ModelBasicList* 
     if ( !isWellPathWithinBoundingBox( wellPathClipBoundingBox ) ) return;
 
     for ( RimWellPathFracture* f : m_rimWellPath->fractureCollection()->activeFractures() )
+    {
+        CVF_ASSERT( f );
+
+        f->fracturePartManager()->appendGeometryPartsToModel( model, *eclView );
+    }
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+void RivWellPathPartMgr::appendStaticFractureModelPartsToModel( cvf::ModelBasicList*    model,
+                                                                const cvf::BoundingBox& wellPathClipBoundingBox )
+{
+    if ( m_rimView.isNull() ) return;
+
+    const RimEclipseView* eclView = dynamic_cast<const RimEclipseView*>( m_rimView.p() );
+    if ( !eclView ) return;
+
+    if ( !m_rimWellPath || !m_rimWellPath->showWellPath() || !m_rimWellPath->fractureModelCollection()->isChecked() )
+        return;
+
+    if ( !isWellPathWithinBoundingBox( wellPathClipBoundingBox ) ) return;
+
+    for ( RimFractureModel* f : m_rimWellPath->fractureModelCollection()->activeFractureModels() )
     {
         CVF_ASSERT( f );
 
