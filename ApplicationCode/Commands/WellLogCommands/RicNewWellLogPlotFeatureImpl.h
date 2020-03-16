@@ -26,6 +26,7 @@ class RimWellBoreStabilityPlot;
 class RimWellLogPlotCollection;
 class RimWellLogPlot;
 class RimWellLogTrack;
+class RimFractureModelPlot;
 
 //==================================================================================================
 ///
@@ -36,12 +37,15 @@ public:
     static RimWellBoreStabilityPlot* createWellBoreStabilityPlot( bool           showAfterCreation = true,
                                                                   const QString& plotDescription   = QString( "" ),
                                                                   const RimWbsParameters* params   = nullptr );
-    static RimWellLogPlot*           createWellLogPlot( bool           showAfterCreation = true,
-                                                        const QString& plotDescription   = QString( "" ) );
-    static RimWellLogTrack*          createWellLogPlotTrack( bool            updateAfterCreation = true,
-                                                             const QString&  trackDescription    = QString( "" ),
-                                                             RimWellLogPlot* existingPlot        = nullptr );
-    static void                      updateAfterCreation( RimWellLogPlot* plot );
+    static RimFractureModelPlot*     createFractureModelPlot( bool           showAfterCreation = true,
+                                                              const QString& plotDescription   = QString( "" ) );
+
+    static RimWellLogPlot*  createWellLogPlot( bool           showAfterCreation = true,
+                                               const QString& plotDescription   = QString( "" ) );
+    static RimWellLogTrack* createWellLogPlotTrack( bool            updateAfterCreation = true,
+                                                    const QString&  trackDescription    = QString( "" ),
+                                                    RimWellLogPlot* existingPlot        = nullptr );
+    static void             updateAfterCreation( RimWellLogPlot* plot );
 
 private:
     static RimWellLogPlotCollection* wellLogPlotCollection();

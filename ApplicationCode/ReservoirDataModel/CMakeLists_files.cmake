@@ -72,6 +72,7 @@ ${CMAKE_CURRENT_LIST_DIR}/RigPolyLinesData.h
 ${CMAKE_CURRENT_LIST_DIR}/RigCaseCellResultCalculator.h
 ${CMAKE_CURRENT_LIST_DIR}/RigGridCrossPlotCurveGrouping.h
 ${CMAKE_CURRENT_LIST_DIR}/RigEclipseCrossPlotDataExtractor.h
+${CMAKE_CURRENT_LIST_DIR}/RigFractureModelLogExtractor.h
 ${CMAKE_CURRENT_LIST_DIR}/RigEquil.h
 ${CMAKE_CURRENT_LIST_DIR}/RigWbsParameter.h
 ${CMAKE_CURRENT_LIST_DIR}/RigEclipseAllenFaultsStatCalc.h
@@ -147,6 +148,7 @@ ${CMAKE_CURRENT_LIST_DIR}/RigGeoMechBoreHoleStressCalculator.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RigPolyLinesData.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RigCaseCellResultCalculator.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RigEclipseCrossPlotDataExtractor.cpp
+${CMAKE_CURRENT_LIST_DIR}/RigFractureModelLogExtractor.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RigEquil.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RigWbsParameter.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RigEclipseAllenFaultsStatCalc.cpp

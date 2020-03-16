@@ -23,6 +23,7 @@
 
 #include "RimCase.h"
 #include "RimEclipseCase.h"
+#include "RimFractureModelPlot.h"
 #include "RimMainPlotCollection.h"
 #include "RimProject.h"
 #include "RimWellBoreStabilityPlot.h"
@@ -58,6 +59,42 @@ RimWellBoreStabilityPlot*
         plot->copyWbsParameters( params );
     }
 
+    plot->setAsPlotMdiWindow();
+
+    wellLogPlotColl->wellLogPlots().push_back( plot );
+
+    if ( !plotDescription.isEmpty() )
+    {
+        plot->nameConfig()->setCustomName( plotDescription );
+    }
+    else
+    {
+        plot->nameConfig()->setCustomName(
+            QString( "Well Bore Stability Plot %1" ).arg( wellLogPlotCollection()->wellLogPlots.size() ) );
+    }
+
+    if ( showAfterCreation )
+    {
+        RiaGuiApplication::instance()->getOrCreateAndShowMainPlotWindow();
+    }
+
+    return plot;
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+RimFractureModelPlot* RicNewWellLogPlotFeatureImpl::createFractureModelPlot( bool           showAfterCreation,
+                                                                             const QString& plotDescription )
+
+{
+    RimWellLogPlotCollection* wellLogPlotColl = wellLogPlotCollection();
+    CVF_ASSERT( wellLogPlotColl );
+
+    // Make sure the summary plot window is created
+    RiaGuiApplication::instance()->getOrCreateMainPlotWindow();
+
+    RimFractureModelPlot* plot = new RimFractureModelPlot();
     plot->setAsPlotMdiWindow();
 
     wellLogPlotColl->wellLogPlots().push_back( plot );
