@@ -17,7 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "RimWellLogPlot.h"
+#include "RimDepthTrackPlot.h"
 
 #include "cafPdmField.h"
 #include "cafPdmPtrField.h"
@@ -25,7 +25,7 @@
 class RimEclipseCase;
 class RimFractureModel;
 
-class RimFractureModelPlot : public RimWellLogPlot
+class RimFractureModelPlot : public RimDepthTrackPlot
 {
     CAF_PDM_HEADER_INIT;
 

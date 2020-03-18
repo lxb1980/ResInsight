@@ -22,6 +22,7 @@
 
 class RimEclipseCase;
 class RimFractureModelPlot;
+class RimFractureModelPlotCollection;
 class RimFractureModel;
 
 //==================================================================================================
@@ -55,4 +56,8 @@ private:
     // static void
     //     createAnglesTrack( RimFractureModelPlot* plot, RimFractureModel* fractureModel, RimEclipseCase* eclipseCase,
     //     int timeStep );
+
+    static RimFractureModelPlot* createFractureModelPlot( bool showAfterCreation, const QString& plotDescription );
+
+    static RimFractureModelPlotCollection* fractureModelPlotCollection();
 };

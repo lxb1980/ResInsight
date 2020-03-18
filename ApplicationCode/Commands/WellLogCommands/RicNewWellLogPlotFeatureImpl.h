@@ -26,7 +26,7 @@ class RimWellBoreStabilityPlot;
 class RimWellLogPlotCollection;
 class RimWellLogPlot;
 class RimWellLogTrack;
-class RimFractureModelPlot;
+class RimDepthTrackPlot;
 
 //==================================================================================================
 ///
@@ -37,15 +37,12 @@ public:
     static RimWellBoreStabilityPlot* createWellBoreStabilityPlot( bool           showAfterCreation = true,
                                                                   const QString& plotDescription   = QString( "" ),
                                                                   const RimWbsParameters* params   = nullptr );
-    static RimFractureModelPlot*     createFractureModelPlot( bool           showAfterCreation = true,
-                                                              const QString& plotDescription   = QString( "" ) );
-
-    static RimWellLogPlot*  createWellLogPlot( bool           showAfterCreation = true,
-                                               const QString& plotDescription   = QString( "" ) );
-    static RimWellLogTrack* createWellLogPlotTrack( bool            updateAfterCreation = true,
-                                                    const QString&  trackDescription    = QString( "" ),
-                                                    RimWellLogPlot* existingPlot        = nullptr );
-    static void             updateAfterCreation( RimWellLogPlot* plot );
+    static RimWellLogPlot*           createWellLogPlot( bool           showAfterCreation = true,
+                                                        const QString& plotDescription   = QString( "" ) );
+    static RimWellLogTrack*          createWellLogPlotTrack( bool               updateAfterCreation = true,
+                                                             const QString&     trackDescription    = QString( "" ),
+                                                             RimDepthTrackPlot* existingPlot        = nullptr );
+    static void                      updateAfterCreation( RimDepthTrackPlot* plot );
 
 private:
     static RimWellLogPlotCollection* wellLogPlotCollection();

@@ -153,6 +153,7 @@ ${CMAKE_CURRENT_LIST_DIR}/RimWellMeasurementInViewCollection.h
 ${CMAKE_CURRENT_LIST_DIR}/RimWellMeasurementInView.h
 ${CMAKE_CURRENT_LIST_DIR}/RimWellDiskConfig.h
 ${CMAKE_CURRENT_LIST_DIR}/RimFractureModelPlot.h
+${CMAKE_CURRENT_LIST_DIR}/RimFractureModelPlotCollection.h
 ${CMAKE_CURRENT_LIST_DIR}/RimFractureModelCurve.h
 )
 
@@ -311,6 +312,7 @@ ${CMAKE_CURRENT_LIST_DIR}/RimWellMeasurementInViewCollection.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RimWellMeasurementInView.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RimWellDiskConfig.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RimFractureModelPlot.cpp
+${CMAKE_CURRENT_LIST_DIR}/RimFractureModelPlotCollection.cpp
 ${CMAKE_CURRENT_LIST_DIR}/RimFractureModelCurve.cpp
 )
 

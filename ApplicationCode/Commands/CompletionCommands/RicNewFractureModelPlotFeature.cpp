@@ -36,19 +36,22 @@
 #include "RimFractureModel.h"
 #include "RimFractureModelPlot.h"
 #include "RimProject.h"
-#include "RimWellLogExtractionCurve.h"
-#include "RimWellLogFile.h"
-#include "RimWellLogFileChannel.h"
-#include "RimWellLogFileCurve.h"
-#include "RimWellLogPlotCollection.h"
+// #include "RimWellLogExtractionCurve.h"
+// #include "RimWellLogFile.h"
+// #include "RimWellLogFileChannel.h"
+// #include "RimWellLogFileCurve.h"
+// #include "RimWellLogPlotCollection.h"
 #include "RimWellLogTrack.h"
-#include "RimWellLogWbsCurve.h"
-#include "RimWellMeasurement.h"
-#include "RimWellMeasurementCollection.h"
-#include "RimWellMeasurementCurve.h"
+// #include "RimWellLogWbsCurve.h"
+// #include "RimWellMeasurement.h"
+// #include "RimWellMeasurementCollection.h"
+// #include "RimWellMeasurementCurve.h"
+#include "RimFractureModelPlotCollection.h"
+#include "RimMainPlotCollection.h"
 #include "RimWellPath.h"
 #include "RimWellPathCollection.h"
 
+#include "RiaGuiApplication.h"
 #include "RicWellLogTools.h"
 #include "RiuPlotMainWindowTools.h"
 
@@ -76,7 +79,7 @@ RimFractureModelPlot*
 {
     caf::ProgressInfo progInfo( 100, "Creating Fracture Model Plot" );
 
-    RimFractureModelPlot* plot = RicNewWellLogPlotFeatureImpl::createFractureModelPlot( true, "Fracture Model" );
+    RimFractureModelPlot* plot = createFractureModelPlot( true, "Fracture Model" );
     plot->setEclipseCase( eclipseCase );
     plot->setFractureModel( fractureModel );
     plot->setTimeStep( timeStep );
@@ -101,7 +104,8 @@ RimFractureModelPlot*
         plot->setDepthType( RiaDefines::TRUE_VERTICAL_DEPTH_RKB );
         plot->setAutoScaleDepthEnabled( true );
 
-        RicNewWellLogPlotFeatureImpl::updateAfterCreation( plot );
+        // RicNewWellLogPlotFeatureImpl::updateAfterCreation( plot );
+        plot->loadDataAndUpdate();
     }
 
     RiuPlotMainWindowTools::selectAsCurrentItem( plot );
@@ -334,3 +338,56 @@ void RicNewFractureModelPlotFeature::createParametersTrack( RimFractureModelPlot
 //     wellPathAnglesTrack->setAnnotationDisplay( RiuPlotAnnotationTool::LIGHT_LINES );
 //     wellPathAnglesTrack->setShowRegionLabels( false );
 // }
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+RimFractureModelPlot* RicNewFractureModelPlotFeature::createFractureModelPlot( bool           showAfterCreation,
+                                                                               const QString& plotDescription )
+
+{
+    RimFractureModelPlotCollection* fractureModelPlotColl = fractureModelPlotCollection();
+    CVF_ASSERT( fractureModelPlotColl );
+
+    // Make sure the summary plot window is created
+    RiaGuiApplication::instance()->getOrCreateMainPlotWindow();
+
+    RimFractureModelPlot* plot = new RimFractureModelPlot();
+    plot->setAsPlotMdiWindow();
+
+    fractureModelPlotColl->fractureModelPlots().push_back( plot );
+
+    if ( !plotDescription.isEmpty() )
+    {
+        plot->nameConfig()->setCustomName( plotDescription );
+    }
+    else
+    {
+        plot->nameConfig()->setCustomName(
+            QString( "Fracture Model Plot %1" ).arg( fractureModelPlotCollection()->fractureModelPlots.size() ) );
+    }
+
+    if ( showAfterCreation )
+    {
+        RiaGuiApplication::instance()->getOrCreateAndShowMainPlotWindow();
+    }
+
+    return plot;
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+RimFractureModelPlotCollection* RicNewFractureModelPlotFeature::fractureModelPlotCollection()
+{
+    RimProject* project = RiaApplication::instance()->project();
+    CVF_ASSERT( project );
+
+    RimMainPlotCollection* mainPlotColl = project->mainPlotCollection();
+    CVF_ASSERT( mainPlotColl );
+
+    RimFractureModelPlotCollection* fractureModelPlotColl = mainPlotColl->fractureModelPlotCollection();
+    CVF_ASSERT( fractureModelPlotColl );
+
+    return mainPlotColl->fractureModelPlotCollection();
+}

@@ -21,6 +21,8 @@
 
 #include "RimFlowCharacteristicsPlot.h"
 #include "RimFlowPlotCollection.h"
+#include "RimFractureModelPlot.h"
+#include "RimFractureModelPlotCollection.h"
 #include "RimGridCrossPlot.h"
 #include "RimGridCrossPlotCollection.h"
 #include "RimMultiPlot.h"
@@ -85,6 +87,9 @@ RimMainPlotCollection::RimMainPlotCollection()
     CAF_PDM_InitFieldNoDefault( &m_multiPlotCollection, "RimMultiPlotCollection", "Multi Plots", "", "", "" );
     m_multiPlotCollection.uiCapability()->setUiHidden( true );
 
+    CAF_PDM_InitFieldNoDefault( &m_fractureModelPlotCollection, "FractureModelPlotCollection", "", "", "", "" );
+    m_fractureModelPlotCollection.uiCapability()->setUiHidden( true );
+
     m_wellLogPlotCollection            = new RimWellLogPlotCollection();
     m_rftPlotCollection                = new RimRftPlotCollection();
     m_pltPlotCollection                = new RimPltPlotCollection();
@@ -94,6 +99,7 @@ RimMainPlotCollection::RimMainPlotCollection()
     m_gridCrossPlotCollection          = new RimGridCrossPlotCollection;
     m_saturationPressurePlotCollection = new RimSaturationPressurePlotCollection;
     m_multiPlotCollection              = new RimMultiPlotCollection;
+    m_fractureModelPlotCollection      = new RimFractureModelPlotCollection;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -195,6 +201,14 @@ RimMultiPlotCollection* RimMainPlotCollection::multiPlotCollection()
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
+RimFractureModelPlotCollection* RimMainPlotCollection::fractureModelPlotCollection()
+{
+    return m_fractureModelPlotCollection();
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
 void RimMainPlotCollection::deleteAllContainedObjects()
 {
     m_wellLogPlotCollection()->wellLogPlots.deleteAllChildObjects();
@@ -206,6 +220,7 @@ void RimMainPlotCollection::deleteAllContainedObjects()
     m_flowPlotCollection()->closeDefaultPlotWindowAndDeletePlots();
     m_saturationPressurePlotCollection()->deleteAllChildObjects();
     m_multiPlotCollection()->deleteAllChildObjects();
+    m_fractureModelPlotCollection()->fractureModelPlots.deleteAllChildObjects();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -263,6 +278,14 @@ void RimMainPlotCollection::updatePlotsWithFormations()
         for ( RimMultiPlot* plotWindow : m_multiPlotCollection->multiPlots() )
         {
             plotWindow->loadDataAndUpdate();
+        }
+    }
+
+    if ( m_fractureModelPlotCollection )
+    {
+        for ( RimFractureModelPlot* fractureModelPlot : m_fractureModelPlotCollection->fractureModelPlots() )
+        {
+            fractureModelPlot->loadDataAndUpdate();
         }
     }
 }
