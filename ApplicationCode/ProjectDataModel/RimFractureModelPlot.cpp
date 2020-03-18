@@ -32,6 +32,7 @@
 // #include "RimWellLogFile.h"
 
 #include "cafPdmBase.h"
+#include "cafPdmFieldIOScriptability.h"
 #include "cafPdmObject.h"
 #include "cafPdmUiComboBoxEditor.h"
 #include "cafPdmUiGroup.h"
@@ -45,15 +46,9 @@ RimFractureModelPlot::RimFractureModelPlot()
 {
     CAF_PDM_InitScriptableObject( "Fracture Model Plot", "", "", "A fracture model plot" );
 
-    CAF_PDM_InitScriptableFieldWithKeywordNoDefault( &m_eclipseCase, "EclipseCase", "EclipseCase", "Eclipse Case", "", "", "" );
-    CAF_PDM_InitScriptableFieldWithKeywordNoDefault( &m_fractureModel,
-                                                     "FractureModel",
-                                                     "FractureModel",
-                                                     "Fracture Model",
-                                                     "",
-                                                     "",
-                                                     "" );
-    CAF_PDM_InitScriptableFieldWithKeywordNoDefault( &m_timeStep, "TimeStemp", "TimeStep", "Time Step", "", "", "" );
+    CAF_PDM_InitScriptableFieldWithIONoDefault( &m_eclipseCase, "EclipseCase", "Eclipse Case", "", "", "" );
+    CAF_PDM_InitScriptableFieldWithIONoDefault( &m_fractureModel, "FractureModel", "Fracture Model", "", "", "" );
+    CAF_PDM_InitScriptableFieldWithIONoDefault( &m_timeStep, "TimeStep", "Time Step", "", "", "" );
 }
 
 //--------------------------------------------------------------------------------------------------

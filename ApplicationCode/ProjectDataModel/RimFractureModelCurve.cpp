@@ -270,7 +270,7 @@ QString RimFractureModelCurve::wellLogChannelUiName() const
 //--------------------------------------------------------------------------------------------------
 QString RimFractureModelCurve::wellLogChannelUnits() const
 {
-    return RiaWellLogUnitTools::noUnitString();
+    return RiaWellLogUnitTools<double>::noUnitString();
 }
 
 //--------------------------------------------------------------------------------------------------
