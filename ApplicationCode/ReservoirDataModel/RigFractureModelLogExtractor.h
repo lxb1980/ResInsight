@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "RigEclipseWellLogExtractor.h"
+
 #include "cvfObject.h"
 #include "cvfVector3.h"
 
@@ -43,10 +45,13 @@ public:
     RigFractureModelLogExtractor( const RigEclipseCaseData* aCase,
                                   const cvf::Vec3d&         position,
                                   const cvf::Vec3d&         direction,
-                                  double                    measuredDepth,
-                                  const cvf::BoundingBox&   geometryBoundingBox );
+                                  double                    measuredDepth );
 
     void curveData( const RigResultAccessor* resultAccessor, std::vector<double>* values );
+
+    const std::vector<double>& cellIntersectionTVDs() const;
+    const std::vector<double>& cellIntersectionMDs() const;
+    const RigWellPath*         wellPathData() const;
 
 private:
     cvf::cref<RigEclipseCaseData>        m_caseData;

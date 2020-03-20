@@ -250,6 +250,14 @@ cvf::Vec3d RimFractureModel::anchorPosition() const
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
+cvf::Vec3d RimFractureModel::thicknessDirection() const
+{
+    return m_thicknessDirection();
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
 cvf::Mat4d RimFractureModel::transformMatrix() const
 {
     // Ellipsis geometry is produced in XY-plane, rotate 90 deg around X to get zero azimuth along Y
@@ -401,4 +409,17 @@ RivFractureModelPartMgr* RimFractureModel::fracturePartManager()
     CVF_ASSERT( m_fracturePartMgr.notNull() );
 
     return m_fracturePartMgr.p();
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+RimWellPath* RimFractureModel::wellPath() const
+{
+    const caf::PdmObjectHandle* objHandle = dynamic_cast<const caf::PdmObjectHandle*>( this );
+    if ( !objHandle ) return nullptr;
+
+    RimWellPath* wellPath = nullptr;
+    objHandle->firstAncestorOrThisOfType( wellPath );
+    return wellPath;
 }

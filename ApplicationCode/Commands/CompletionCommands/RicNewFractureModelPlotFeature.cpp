@@ -18,44 +18,28 @@
 
 #include "RicNewFractureModelPlotFeature.h"
 
+#include "RiaApplication.h"
 #include "RiaColorTables.h"
+#include "RiaGuiApplication.h"
 #include "RiaLogging.h"
 
-//#include "RicNewWellLogCurveExtractionFeature.h"
-// #include "RicNewWellLogFileCurveFeature.h"
-#include "RicWellLogTools.h"
 #include "WellLogCommands/RicNewWellLogPlotFeatureImpl.h"
 
-// #include "RigFemPartResultsCollection.h"
-// #include "RigFemResultAddress.h"
-// #include "RigGeoMechCaseData.h"
-// #include "RimGeoMechCase.h"
-// #include "RimGeoMechView.h"
 #include "RigWellPath.h"
+
+#include "RimEclipseCase.h"
 #include "RimEclipseView.h"
 #include "RimFractureModel.h"
+#include "RimFractureModelCurve.h"
 #include "RimFractureModelPlot.h"
-#include "RimProject.h"
-// #include "RimWellLogExtractionCurve.h"
-// #include "RimWellLogFile.h"
-// #include "RimWellLogFileChannel.h"
-// #include "RimWellLogFileCurve.h"
-// #include "RimWellLogPlotCollection.h"
-#include "RimWellLogTrack.h"
-// #include "RimWellLogWbsCurve.h"
-// #include "RimWellMeasurement.h"
-// #include "RimWellMeasurementCollection.h"
-// #include "RimWellMeasurementCurve.h"
 #include "RimFractureModelPlotCollection.h"
 #include "RimMainPlotCollection.h"
+#include "RimProject.h"
+#include "RimWellLogTrack.h"
 #include "RimWellPath.h"
 #include "RimWellPathCollection.h"
 
-#include "RiaGuiApplication.h"
-#include "RicWellLogTools.h"
 #include "RiuPlotMainWindowTools.h"
-
-#include "RiaApplication.h"
 
 #include "cafProgressInfo.h"
 #include "cafSelectionManager.h"
@@ -85,13 +69,18 @@ RimFractureModelPlot*
     plot->setTimeStep( timeStep );
 
     {
-        // auto task = progInfo.task( "Creating formation track", 2 );
-        // createFormationTrack( plot, wellPath, eclipseCase );
+        auto task = progInfo.task( "Creating formation track", 2 );
+        createFormationTrack( plot, fractureModel, eclipseCase );
     }
 
     {
         auto task = progInfo.task( "Creating parameters track", 15 );
-        createParametersTrack( plot, fractureModel, eclipseCase, timeStep );
+
+        std::vector<QString> resultVariables = {"PORO", "PRESSURE", "PERMZ"};
+        for ( auto resultVariable : resultVariables )
+        {
+            createParametersTrack( plot, fractureModel, eclipseCase, timeStep, resultVariable );
+        }
     }
 
     {
@@ -159,16 +148,19 @@ void RicNewFractureModelPlotFeature::setupActionLook( QAction* actionToSetup )
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-// void RicNewFractureModelPlotFeature::createFormationTrack( RimFractureModelPlot* plot,
-//                                                            RimFractureModel*          wellPath,
-//                                                            RimEclipseCase*       geoMechCase )
-// {
-//     RimWellLogTrack* formationTrack = RicNewWellLogPlotFeatureImpl::createWellLogPlotTrack( false, "Formations", plot
-//     ); formationTrack->setFormationWellPath( wellPath ); formationTrack->setFormationCase( geoMechCase );
-//     formationTrack->setAnnotationType( RiuPlotAnnotationTool::FORMATION_ANNOTATIONS );
-//     formationTrack->setVisibleXRange( 0.0, 0.0 );
-//     formationTrack->setColSpan( RimPlot::ONE );
-// }
+void RicNewFractureModelPlotFeature::createFormationTrack( RimFractureModelPlot* plot,
+                                                           RimFractureModel*     fractureModel,
+                                                           RimEclipseCase*       eclipseCase )
+{
+    RimWellLogTrack* formationTrack = RicNewWellLogPlotFeatureImpl::createWellLogPlotTrack( false, "Formations", plot );
+
+    // TODO: this needs to be the "fake" wellpath?
+    formationTrack->setFormationWellPath( fractureModel->wellPath() );
+    formationTrack->setFormationCase( eclipseCase );
+    formationTrack->setAnnotationType( RiuPlotAnnotationTool::FORMATION_ANNOTATIONS );
+    formationTrack->setVisibleXRange( 0.0, 0.0 );
+    formationTrack->setColSpan( RimPlot::ONE );
+}
 
 //--------------------------------------------------------------------------------------------------
 ///
@@ -176,168 +168,47 @@ void RicNewFractureModelPlotFeature::setupActionLook( QAction* actionToSetup )
 void RicNewFractureModelPlotFeature::createParametersTrack( RimFractureModelPlot* plot,
                                                             RimFractureModel*     fractureModel,
                                                             RimEclipseCase*       eclipseCase,
-                                                            int                   timeStep )
+                                                            int                   timeStep,
+                                                            const QString&        resultVariable )
 {
-    RimWellLogTrack* paramCurvesTrack =
-        RicNewWellLogPlotFeatureImpl::createWellLogPlotTrack( false, "WBS Parameters", plot );
-    paramCurvesTrack->setColSpan( RimPlot::TWO );
-    paramCurvesTrack->setVisibleXRange( 0.0, 2.0 );
-    paramCurvesTrack->setAutoScaleXEnabled( true );
-    paramCurvesTrack->setTickIntervals( 1.0, 0.2 );
-    paramCurvesTrack->setXAxisGridVisibility( RimWellLogPlot::AXIS_GRID_MAJOR_AND_MINOR );
-    // paramCurvesTrack->setFormationWellPath( wellPath );
-    // paramCurvesTrack->setFormationCase( geoMechCase );
-    paramCurvesTrack->setAnnotationType( RiuPlotAnnotationTool::CURVE_ANNOTATIONS );
-    paramCurvesTrack->setShowRegionLabels( true );
-    paramCurvesTrack->setShowWindow( true );
-    // std::set<RigWbsParameter> parameters = RigWbsParameter::allParameters();
+    RimWellLogTrack* plotTrack = RicNewWellLogPlotFeatureImpl::createWellLogPlotTrack( false, resultVariable, plot );
+    plotTrack->setFormationWellPath( fractureModel->wellPath() );
+    plotTrack->setColSpan( RimPlot::TWO );
+    plotTrack->setVisibleXRange( 0.0, 2.0 );
+    plotTrack->setAutoScaleXEnabled( true );
+    plotTrack->setTickIntervals( 1.0, 0.2 );
+    plotTrack->setXAxisGridVisibility( RimWellLogPlot::AXIS_GRID_MAJOR_AND_MINOR );
+    plotTrack->setAnnotationType( RiuPlotAnnotationTool::CURVE_ANNOTATIONS );
+    plotTrack->setShowRegionLabels( true );
+    plotTrack->setShowWindow( true );
 
-    // caf::ColorTable                             colors     = RiaColorTables::contrastCategoryPaletteColors();
-    // std::vector<RiuQwtPlotCurve::LineStyleEnum> lineStyles = {RiuQwtPlotCurve::STYLE_SOLID,
-    //                                                           RiuQwtPlotCurve::STYLE_DASH,
-    //                                                           RiuQwtPlotCurve::STYLE_DASH_DOT};
+    caf::ColorTable                             colors     = RiaColorTables::contrastCategoryPaletteColors();
+    std::vector<RiuQwtPlotCurve::LineStyleEnum> lineStyles = {RiuQwtPlotCurve::STYLE_SOLID,
+                                                              RiuQwtPlotCurve::STYLE_DASH,
+                                                              RiuQwtPlotCurve::STYLE_DASH_DOT};
 
-    // size_t i = 0;
-    // for ( const RigWbsParameter& param : parameters )
-    // {
-    //     if ( !param.hasExternalSource() || param == RigWbsParameter::waterDensity() ) continue;
+    RimFractureModelCurve* curve = new RimFractureModelCurve;
+    curve->setFractureModel( fractureModel );
+    curve->setCase( eclipseCase );
+    curve->setEclipseResultVariable( resultVariable );
+    curve->setColor( colors.cycledColor3f( 0 ) );
+    curve->setLineStyle( lineStyles[0] );
+    curve->setLineThickness( 2 );
 
-    //     RigFemResultAddress        resAddr( RIG_WELLPATH_DERIVED, param.name().toStdString(), "" );
-    //     RimWellLogExtractionCurve* curve =
-    //         RicWellLogTools::addWellLogExtractionCurve( paramCurvesTrack, geoMechCase, nullptr, wellPath, nullptr,
-    //         -1, false, false );
-    //     curve->setEclipseResultAddress( resAddr );
-    //     curve->setCurrentTimeStep( timeStep );
-    //     curve->setColor( colors.cycledColor3f( i ) );
-    //     curve->setLineStyle( lineStyles[i % lineStyles.size()] );
-    //     curve->setLineThickness( 2 );
-    //     curve->loadDataAndUpdate( false );
-    //     curve->setCustomName( param.name() );
-    //     i++;
-    // }
-    paramCurvesTrack->setAutoScaleXEnabled( true );
+    plotTrack->addCurve( curve );
+    plotTrack->setAutoScaleXEnabled( true );
+    curve->loadDataAndUpdate( true );
+
+    curve->updateConnectedEditors();
+    plotTrack->updateConnectedEditors();
+    plot->updateConnectedEditors();
+
+    RiaApplication::instance()->project()->updateConnectedEditors();
+
+    RiaGuiApplication::instance()->getOrCreateMainPlotWindow();
+    RiuPlotMainWindowTools::selectAsCurrentItem( curve );
+    RiuPlotMainWindowTools::showPlotMainWindow();
 }
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-// void RicNewFractureModelPlotFeature::createStabilityCurvesTrack( RimFractureModelPlot* plot,
-//                                                                  RimFractureModel*     wellPath,
-//                                                                  RimEclipseCase*       geoMechCase,
-//                                                                  int                   timeStep )
-// {
-//     RimWellLogTrack* stabilityCurvesTrack = RicNewWellLogPlotFeatureImpl::createWellLogPlotTrack( false,
-//                                                                                                   "Stability Curves",
-
-//                                                                                                   plot );
-//     stabilityCurvesTrack->setVisibleXRange( 0.0, 2.5 );
-//     stabilityCurvesTrack->setColSpan( RimPlot::THREE );
-//     stabilityCurvesTrack->setAutoScaleXEnabled( true );
-//     stabilityCurvesTrack->setTickIntervals( 1.0, 0.2 );
-//     stabilityCurvesTrack->setXAxisGridVisibility( RimWellLogPlot::AXIS_GRID_MAJOR_AND_MINOR );
-//     stabilityCurvesTrack->setFormationWellPath( wellPath );
-//     stabilityCurvesTrack->setFormationCase( geoMechCase );
-//     stabilityCurvesTrack->setAnnotationType( RiuPlotAnnotationTool::FORMATION_ANNOTATIONS );
-//     stabilityCurvesTrack->setAnnotationDisplay( RiuPlotAnnotationTool::LIGHT_LINES );
-//     stabilityCurvesTrack->setShowRegionLabels( false );
-
-//     std::vector<QString> resultNames = RiaDefines::wbsDerivedResultNames();
-
-//     std::vector<cvf::Color3f> colors = {cvf::Color3f::BLUE,
-//                                         cvf::Color3f::BROWN,
-//                                         cvf::Color3f::RED,
-//                                         cvf::Color3f::PURPLE,
-//                                         cvf::Color3f::DARK_GREEN,
-//                                         cvf::Color3f::OLIVE};
-
-//     std::vector<RiuQwtPlotCurve::LineStyleEnum> lineStyles( resultNames.size(), RiuQwtPlotCurve::STYLE_SOLID );
-//     lineStyles.back() = RiuQwtPlotCurve::STYLE_DASH;
-
-//     for ( size_t i = 0; i < resultNames.size(); ++i )
-//     {
-//         const QString&      resultName = resultNames[i];
-//         RigFemResultAddress resAddr( RIG_WELLPATH_DERIVED, resultName.toStdString(), "" );
-//         RimWellLogWbsCurve* curve =
-//             RicWellLogTools::addWellLogWbsCurve( stabilityCurvesTrack, geoMechCase, nullptr, wellPath, -1, false,
-//             false );
-//         curve->setEclipseResultAddress( resAddr );
-//         curve->setCurrentTimeStep( timeStep );
-//         curve->setAutoNameComponents( false, true, false, false, false );
-//         curve->setColor( colors[i % colors.size()] );
-//         curve->setLineStyle( lineStyles[i] );
-//         curve->setLineThickness( 2 );
-//         curve->loadDataAndUpdate( false );
-//         curve->setSmoothCurve( true );
-//         curve->setSmoothingThreshold( 0.002 );
-//     }
-
-//     stabilityCurvesTrack->setAutoScaleXEnabled( true );
-// }
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-// void RicNewFractureModelPlotFeature::createAnglesTrack( RimFractureModelPlot* plot,
-//                                                         RimFractureModel*              wellPath,
-//                                                         RimEclipseCase*           geoMechCase,
-//                                                         int                       timeStep )
-// {
-//     RimWellLogTrack* wellPathAnglesTrack =
-//         RicNewWellLogPlotFeatureImpl::createWellLogPlotTrack( false, "Well Path Angles", plot );
-//     double               minValue = 360.0, maxValue = 0.0;
-//     const double         angleIncrement = 90.0;
-//     std::vector<QString> resultNames    = RiaDefines::wbsAngleResultNames();
-
-//     std::vector<cvf::Color3f> colors = {cvf::Color3f::GREEN, cvf::Color3f::DARK_ORANGE};
-
-//     std::vector<RiuQwtPlotCurve::LineStyleEnum> lineStyles = {RiuQwtPlotCurve::STYLE_DASH,
-//     RiuQwtPlotCurve::STYLE_SOLID};
-
-//     for ( size_t i = 0; i < resultNames.size(); ++i )
-//     {
-//         const QString&             resultName = resultNames[i];
-//         RigFemResultAddress        resAddr( RIG_WELLPATH_DERIVED, resultName.toStdString(), "" );
-//         RimWellLogExtractionCurve* curve = RicWellLogTools::addWellLogExtractionCurve( wellPathAnglesTrack,
-//                                                                                        geoMechCase,
-//                                                                                        nullptr,
-//                                                                                        wellPath,
-//                                                                                        nullptr,
-//                                                                                        -1,
-//                                                                                        false,
-//                                                                                        false );
-//         curve->setEclipseResultAddress( resAddr );
-//         curve->setCurrentTimeStep( timeStep );
-//         curve->setCustomName( resultName );
-
-//         curve->setColor( colors[i % colors.size()] );
-//         curve->setLineStyle( lineStyles[i % lineStyles.size()] );
-//         curve->setLineThickness( 2 );
-
-//         curve->loadDataAndUpdate( false );
-
-//         double actualMinValue = minValue, actualMaxValue = maxValue;
-//         curve->xValueRangeInQwt( &actualMinValue, &actualMaxValue );
-//         while ( maxValue < actualMaxValue )
-//         {
-//             maxValue += angleIncrement;
-//         }
-//         while ( minValue > actualMinValue )
-//         {
-//             minValue -= angleIncrement;
-//         }
-//         maxValue = cvf::Math::clamp( maxValue, angleIncrement, 720.0 );
-//         minValue = cvf::Math::clamp( minValue, 0.0, maxValue - 90.0 );
-//     }
-//     wellPathAnglesTrack->setColSpan( RimPlot::TWO );
-//     wellPathAnglesTrack->setVisibleXRange( minValue, maxValue );
-//     wellPathAnglesTrack->setTickIntervals( 180.0, 45.0 );
-//     wellPathAnglesTrack->setXAxisGridVisibility( RimWellLogPlot::AXIS_GRID_MAJOR_AND_MINOR );
-//     wellPathAnglesTrack->setFormationWellPath( wellPath );
-//     wellPathAnglesTrack->setFormationCase( geoMechCase );
-//     wellPathAnglesTrack->setAnnotationType( RiuPlotAnnotationTool::FORMATION_ANNOTATIONS );
-//     wellPathAnglesTrack->setAnnotationDisplay( RiuPlotAnnotationTool::LIGHT_LINES );
-//     wellPathAnglesTrack->setShowRegionLabels( false );
-// }
 
 //--------------------------------------------------------------------------------------------------
 ///

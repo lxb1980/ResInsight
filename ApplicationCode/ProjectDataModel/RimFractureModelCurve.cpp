@@ -18,21 +18,24 @@
 
 #include "RimFractureModelCurve.h"
 
+#include "RigEclipseCaseData.h"
+#include "RigFractureModelLogExtractor.h"
+#include "RigResultAccessorFactory.h"
 #include "RigWellLogCurveData.h"
 #include "RigWellPath.h"
 
-#include "RimProject.h"
+#include "RimCase.h"
+#include "RimEclipseCase.h"
+#include "RimEclipseResultDefinition.h"
+#include "RimFractureModel.h"
+#include "RimFractureModelPlot.h"
 #include "RimTools.h"
 #include "RimWellLogFile.h"
 #include "RimWellLogPlot.h"
 #include "RimWellLogTrack.h"
-#include "RimWellMeasurement.h"
-#include "RimWellMeasurementCollection.h"
-#include "RimWellMeasurementFilter.h"
 #include "RimWellPath.h"
 #include "RimWellPathCollection.h"
 #include "RimWellPlotTools.h"
-#include "RimWellRftPlot.h"
 
 #include "RiuQwtPlotCurve.h"
 #include "RiuQwtPlotWidget.h"
@@ -54,12 +57,9 @@ RimFractureModelCurve::RimFractureModelCurve()
 {
     CAF_PDM_InitObject( "Fracture Model Curve", "", "", "" );
 
-    CAF_PDM_InitFieldNoDefault( &m_wellPath, "CurveWellPath", "Well Path", "", "", "" );
-    m_wellPath.uiCapability()->setUiTreeChildrenHidden( true );
-
-    // CAF_PDM_InitFieldNoDefault( &m_measurementKind, "CurveMeasurementKind", "Measurement Kind", "", "", "" );
-    // m_measurementKind.uiCapability()->setUiTreeChildrenHidden( true );
-    // m_measurementKind.uiCapability()->setUiHidden( true );
+    CAF_PDM_InitFieldNoDefault( &m_fractureModel, "FractureModel", "Fracture Model", "", "", "" );
+    m_fractureModel.uiCapability()->setUiTreeChildrenHidden( true );
+    m_fractureModel.uiCapability()->setUiHidden( true );
 
     m_wellPath = nullptr;
 }
@@ -74,214 +74,101 @@ RimFractureModelCurve::~RimFractureModelCurve()
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-void RimFractureModelCurve::onLoadDataAndUpdate( bool updateParentPlot )
+void RimFractureModelCurve::setFractureModel( RimFractureModel* fractureModel )
 {
-    this->RimPlotCurve::updateCurvePresentation( updateParentPlot );
+    m_fractureModel = fractureModel;
+    m_wellPath      = fractureModel->wellPath();
+}
 
-    if ( isCurveVisible() )
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+void RimFractureModelCurve::performDataExtraction( bool* isUsingPseudoLength )
+{
+    std::vector<double> values;
+    std::vector<double> measuredDepthValues;
+    std::vector<double> tvDepthValues;
+    double              rkbDiff = 0.0;
+
+    RiaDefines::DepthUnitType depthUnit = RiaDefines::UNIT_METER;
+    QString                   xUnits    = RiaWellLogUnitTools<double>::noUnitString();
+
+    *isUsingPseudoLength = false;
+
+    RimEclipseCase* eclipseCase = dynamic_cast<RimEclipseCase*>( m_case.value() );
+    if ( eclipseCase )
     {
-        RimWellLogPlot* wellLogPlot;
-        firstAncestorOrThisOfType( wellLogPlot );
-        CVF_ASSERT( wellLogPlot );
+        RigFractureModelLogExtractor eclExtractor( eclipseCase->eclipseCaseData(),
+                                                   m_fractureModel()->anchorPosition(),
+                                                   m_fractureModel()->thicknessDirection(),
+                                                   m_fractureModel()->startMD() );
 
-        // RimWellPathCollection* wellPathCollection = RimTools::wellPathCollection();
-        // if ( m_wellPath && !m_measurementKind().isEmpty() && wellPathCollection )
-        // {
+        measuredDepthValues = eclExtractor.cellIntersectionMDs();
+        tvDepthValues       = eclExtractor.cellIntersectionTVDs();
+        rkbDiff             = eclExtractor.wellPathData()->rkbDiff();
 
-        // Extract the values for this measurement kind
-        std::vector<double> values;
-        std::vector<double> measuredDepthValues;
+        // TODO: hard coded!
+        m_eclipseResultDefinition->setResultType( RiaDefines::STATIC_NATIVE );
+        if ( m_eclipseResultDefinition->resultVariable() == QString( "PRESSURE" ) )
+            m_eclipseResultDefinition->setResultType( RiaDefines::DYNAMIC_NATIVE );
 
-        // for ( auto& measurement : measurements )
-        // {
-        //     if ( measurement->kind() == measurementKind() )
-        //     {
-        //         values.push_back( measurement->value() );
-        //         measuredDepthValues.push_back( measurement->MD() );
-        //     }
-        // }
+        m_eclipseResultDefinition->setEclipseCase( eclipseCase );
 
-        if ( values.size() == measuredDepthValues.size() )
+        m_eclipseResultDefinition->loadResult();
+
+        cvf::ref<RigResultAccessor> resAcc =
+            RigResultAccessorFactory::createFromResultDefinition( eclipseCase->eclipseCaseData(),
+                                                                  0,
+                                                                  m_timeStep,
+                                                                  m_eclipseResultDefinition );
+
+        if ( resAcc.notNull() )
         {
-            // RigWellPath* rigWellPath = m_wellPath->wellPathGeometry();
-            // if ( rigWellPath )
-            // {
-            //     std::vector<double> trueVerticalDepthValues;
-
-            //     // for ( double measuredDepthValue : measuredDepthValues )
-            //     // {
-            //     //     trueVerticalDepthValues.push_back(
-            //     //         -rigWellPath->interpolatedPointAlongWellPath( measuredDepthValue ).z() );
-            //     // }
-
-            //     this->setValuesWithMdAndTVD( values,
-            //                                  measuredDepthValues,
-            //                                  trueVerticalDepthValues,
-            //                                  m_wellPath->wellPathGeometry()->rkbDiff(),
-            //                                  RiaDefines::UNIT_METER,
-            //                                  false );
-            // }
-            // else
-            // {
-            this->setValuesAndDepths( values, measuredDepthValues, RiaDefines::MEASURED_DEPTH, 0.0, RiaDefines::UNIT_METER, false );
+            eclExtractor.curveData( resAcc.p(), &values );
+        }
+        else
+        {
+            std::cerr << "RESULT ACCESSOR IS NULL" << std::endl;
         }
 
-        if ( m_isUsingAutoName )
+        RiaEclipseUnitTools::UnitSystem eclipseUnitsType = eclipseCase->eclipseCaseData()->unitsType();
+        if ( eclipseUnitsType == RiaEclipseUnitTools::UNITS_FIELD )
         {
-            m_qwtPlotCurve->setTitle( createCurveAutoName() );
+            // See https://github.com/OPM/ResInsight/issues/538
+
+            depthUnit = RiaDefines::UNIT_FEET;
         }
+    }
 
-        // setSymbol( getSymbolForMeasurementKind( m_measurementKind() ) );
-        // setColor( getColorForMeasurementKind( measurementKind() ) );
-        // setSymbolEdgeColor( getColorForMeasurementKind( measurementKind() ) );
-        // setLineStyle( RiuQwtPlotCurve::STYLE_NONE );
+    std::cout << "Size TVD: " << tvDepthValues.size() << " RKB diff: " << rkbDiff << std::endl;
+    for ( int i = 0; i < static_cast<int>( values.size() ); i++ )
+    {
+        std::cout << "Values: " << measuredDepthValues[i] << " ==> " << tvDepthValues[i] << " ==> " << values[i]
+                  << std::endl;
+    }
 
-        RiaDefines::DepthUnitType displayUnit = RiaDefines::UNIT_METER;
-        if ( wellLogPlot )
+    bool performDataSmoothing = false;
+    if ( !values.empty() && !measuredDepthValues.empty() )
+    {
+        if ( tvDepthValues.empty() )
         {
-            displayUnit = wellLogPlot->depthUnit();
+            this->setValuesAndDepths( values,
+                                      measuredDepthValues,
+                                      RiaDefines::MEASURED_DEPTH,
+                                      0.0,
+                                      depthUnit,
+                                      !performDataSmoothing,
+                                      xUnits );
         }
-
-        RiaDefines::DepthTypeEnum depthType = RiaDefines::MEASURED_DEPTH;
-        if ( wellLogPlot && this->curveData()->availableDepthTypes().count( wellLogPlot->depthType() ) )
+        else
         {
-            depthType = wellLogPlot->depthType();
+            this->setValuesWithMdAndTVD( values,
+                                         measuredDepthValues,
+                                         tvDepthValues,
+                                         rkbDiff,
+                                         depthUnit,
+                                         !performDataSmoothing,
+                                         xUnits );
         }
-
-        m_qwtPlotCurve->setSamples( this->curveData()->xPlotValues().data(),
-                                    this->curveData()->depthPlotValues( depthType, displayUnit ).data(),
-                                    static_cast<int>( this->curveData()->xPlotValues().size() ) );
-        m_qwtPlotCurve->setLineSegmentStartStopIndices( this->curveData()->polylineStartStopIndices() );
     }
-
-    if ( updateParentPlot )
-    {
-        updateZoomInParentPlot();
-    }
-
-    if ( m_parentQwtPlot )
-    {
-        m_parentQwtPlot->replot();
-    }
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-void RimFractureModelCurve::setWellPath( RimWellPath* wellPath )
-{
-    m_wellPath = wellPath;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-RimWellPath* RimFractureModelCurve::wellPath() const
-{
-    return m_wellPath;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-void RimFractureModelCurve::fieldChangedByUi( const caf::PdmFieldHandle* changedField,
-                                              const QVariant&            oldValue,
-                                              const QVariant&            newValue )
-{
-    RimWellLogCurve::fieldChangedByUi( changedField, oldValue, newValue );
-
-    // if ( changedField == &m_wellPath || changedField == &m_measurementKind )
-    // {
-    this->loadDataAndUpdate( true );
-    //    }
-    if ( m_parentQwtPlot ) m_parentQwtPlot->replot();
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-void RimFractureModelCurve::defineUiOrdering( QString uiConfigName, caf::PdmUiOrdering& uiOrdering )
-{
-    RimPlotCurve::updateOptionSensitivity();
-
-    caf::PdmUiGroup* curveDataGroup = uiOrdering.addNewGroup( "Curve Data" );
-    curveDataGroup->add( &m_wellPath );
-
-    caf::PdmUiGroup* appearanceGroup = uiOrdering.addNewGroup( "Appearance" );
-    RimPlotCurve::appearanceUiOrdering( *appearanceGroup );
-
-    caf::PdmUiGroup* nameGroup = uiOrdering.addNewGroup( "Curve Name" );
-    nameGroup->add( &m_showLegend );
-    RimPlotCurve::curveNameUiOrdering( *nameGroup );
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-void RimFractureModelCurve::defineUiTreeOrdering( caf::PdmUiTreeOrdering& uiTreeOrdering, QString uiConfigName /*= ""*/ )
-{
-    uiTreeOrdering.skipRemainingChildren( true );
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-QList<caf::PdmOptionItemInfo>
-    RimFractureModelCurve::calculateValueOptions( const caf::PdmFieldHandle* fieldNeedingOptions, bool* useOptionsOnly )
-{
-    QList<caf::PdmOptionItemInfo> options;
-
-    options = RimWellLogCurve::calculateValueOptions( fieldNeedingOptions, useOptionsOnly );
-    if ( options.size() > 0 ) return options;
-
-    if ( fieldNeedingOptions == &m_wellPath )
-    {
-        RimTools::wellPathOptionItems( &options );
-    }
-
-    return options;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-QString RimFractureModelCurve::createCurveAutoName()
-{
-    if ( m_wellPath )
-    {
-        // TODO: should take name from fracture?
-        return "Fracture model";
-    }
-
-    return "Empty curve";
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-QString RimFractureModelCurve::wellLogChannelUiName() const
-{
-    // Does not really make sense for measurement curve.
-    return QString( "" );
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-QString RimFractureModelCurve::wellLogChannelUnits() const
-{
-    return RiaWellLogUnitTools<double>::noUnitString();
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-QString RimFractureModelCurve::wellName() const
-{
-    if ( m_wellPath )
-    {
-        return m_wellPath->name();
-    }
-
-    return QString( "" );
 }

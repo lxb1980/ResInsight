@@ -20,6 +20,7 @@
 
 #include "RiaLogging.h"
 
+#include "RigActiveCellInfo.h"
 #include "RigEclipseCaseData.h"
 #include "RigEclipseWellLogExtractor.h"
 #include "RigMainGrid.h"
@@ -32,6 +33,7 @@
 #include "cvfGeometryTools.h"
 #include "cvfPlane.h"
 
+#include <iostream>
 #include <map>
 
 //==================================================================================================
@@ -40,8 +42,7 @@
 RigFractureModelLogExtractor::RigFractureModelLogExtractor( const RigEclipseCaseData* aCase,
                                                             const cvf::Vec3d&         position,
                                                             const cvf::Vec3d&         direction,
-                                                            double                    measuredDepth,
-                                                            const cvf::BoundingBox&   geometryBoundingBox )
+                                                            double                    measuredDepth )
     : m_caseData( aCase )
 {
     // Create a "fake" well path which from top to bottom of formation
@@ -49,7 +50,7 @@ RigFractureModelLogExtractor::RigFractureModelLogExtractor( const RigEclipseCase
 
     m_wellPath = new RigWellPath;
 
-    // m_rimReservoirView->currentActiveCellInfo()->geometryBoundingBox().max();
+    const cvf::BoundingBox& geometryBoundingBox = aCase->activeCellInfo( RiaDefines::MATRIX_MODEL )->geometryBoundingBox();
 
     // Position on top of formation
     cvf::Plane topPlane;
@@ -58,13 +59,20 @@ RigFractureModelLogExtractor::RigFractureModelLogExtractor( const RigEclipseCase
     cvf::Vec3d topPosition;
     topPlane.intersect( position, abovePlane, &topPosition );
 
+    double depthDiff = 0.0 - topPosition.z();
+    m_wellPath->setDatumElevation( topPosition.z() );
+
+    std::cout << "TOP POSITION: " << topPosition.z() << " MD: " << 0.0 << std::endl;
+
     m_wellPath->m_wellPathPoints.push_back( topPosition );
-    // TODO: not correct
-    m_wellPath->m_measuredDepths.push_back( 0.0 ); // measuredDepth );
+    m_wellPath->m_measuredDepths.push_back( 0.0 ); // topPosition.z() ); // geometryBoundingBox.max().z() );
+                                                   // // measuredDepth );
 
     // The anchor position
     m_wellPath->m_wellPathPoints.push_back( position );
-    m_wellPath->m_measuredDepths.push_back( measuredDepth );
+    double dist = ( topPosition - position ).length();
+    std::cout << "ANCHOR: " << position.z() << " MD: " << dist << std::endl;
+    m_wellPath->m_measuredDepths.push_back( dist ); // measuredDepth + depthDiff );
 
     m_wellLogExtractor = new RigEclipseWellLogExtractor( aCase, &*m_wellPath, "fracture model" );
 }
@@ -75,4 +83,28 @@ RigFractureModelLogExtractor::RigFractureModelLogExtractor( const RigEclipseCase
 void RigFractureModelLogExtractor::curveData( const RigResultAccessor* resultAccessor, std::vector<double>* values )
 {
     m_wellLogExtractor->curveData( resultAccessor, values );
+}
+
+//==================================================================================================
+///
+//==================================================================================================
+const std::vector<double>& RigFractureModelLogExtractor::cellIntersectionTVDs() const
+{
+    return m_wellLogExtractor->cellIntersectionTVDs();
+}
+
+//==================================================================================================
+///
+//==================================================================================================
+const std::vector<double>& RigFractureModelLogExtractor::cellIntersectionMDs() const
+{
+    return m_wellLogExtractor->cellIntersectionMDs();
+}
+
+//==================================================================================================
+///
+//==================================================================================================
+const RigWellPath* RigFractureModelLogExtractor::wellPathData() const
+{
+    return m_wellLogExtractor->wellPathData();
 }

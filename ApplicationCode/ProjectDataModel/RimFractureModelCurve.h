@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "RimWellLogCurve.h"
+#include "RimWellLogExtractionCurve.h"
 
 #include "RiuQwtSymbol.h"
 
@@ -29,11 +29,12 @@
 
 class RimWellPath;
 class RimWellMeasurement;
+class RimFractureModel;
 
 //==================================================================================================
 ///
 //==================================================================================================
-class RimFractureModelCurve : public RimWellLogCurve
+class RimFractureModelCurve : public RimWellLogExtractionCurve
 {
     CAF_PDM_HEADER_INIT;
 
@@ -41,32 +42,10 @@ public:
     RimFractureModelCurve();
     ~RimFractureModelCurve() override;
 
-    void         setWellPath( RimWellPath* wellPath );
-    RimWellPath* wellPath() const;
-    // void         setMeasurementKind( const QString& measurementKind );
-    // QString      measurementKind() const;
-
-    // Overrides from RimWellLogPlotCurve
-    QString wellName() const override;
-    QString wellLogChannelUiName() const override;
-    QString wellLogChannelUnits() const override;
+    void setFractureModel( RimFractureModel* fractureModel );
 
 protected:
-    // Overrides from RimWellLogCurve
-    QString createCurveAutoName() override;
-    void    onLoadDataAndUpdate( bool updateParentPlot ) override;
+    void performDataExtraction( bool* isUsingPseudoLength ) override;
 
-    // Pdm overrrides
-    void fieldChangedByUi( const caf::PdmFieldHandle* changedField, const QVariant& oldValue, const QVariant& newValue ) override;
-    void defineUiOrdering( QString uiConfigName, caf::PdmUiOrdering& uiOrdering ) override;
-    void defineUiTreeOrdering( caf::PdmUiTreeOrdering& uiTreeOrdering, QString uiConfigName = "" ) override;
-    QList<caf::PdmOptionItemInfo> calculateValueOptions( const caf::PdmFieldHandle* fieldNeedingOptions,
-                                                         bool*                      useOptionsOnly ) override;
-
-    // RiuQwtSymbol::PointSymbolEnum getSymbolForMeasurementKind( const QString& measurementKind );
-    // cvf::Color3f                  getColorForMeasurementKind( const QString& measurementKind );
-
-protected:
-    caf::PdmPtrField<RimWellPath*> m_wellPath;
-    //    caf::PdmField<QString>         m_measurementKind;
+    caf::PdmPtrField<RimFractureModel*> m_fractureModel;
 };

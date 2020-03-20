@@ -36,6 +36,7 @@
 
 class RimEclipseCase;
 class RivFractureModelPartMgr;
+class RimWellPath;
 
 //==================================================================================================
 ///
@@ -56,6 +57,7 @@ public:
     ~RimFractureModel( void ) override;
 
     cvf::Vec3d anchorPosition() const;
+    cvf::Vec3d thicknessDirection() const;
 
     cvf::Mat4d transformMatrix() const;
 
@@ -72,6 +74,8 @@ public:
     bool                              isEnabled() const override;
 
     RivFractureModelPartMgr* fracturePartManager();
+
+    RimWellPath* wellPath() const;
 
 protected:
     void defineUiOrdering( QString uiConfigName, caf::PdmUiOrdering& uiOrdering ) override;

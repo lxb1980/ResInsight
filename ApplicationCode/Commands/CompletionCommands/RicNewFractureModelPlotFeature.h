@@ -42,20 +42,13 @@ protected:
     void setupActionLook( QAction* actionToSetup ) override;
 
 private:
-    // static void
-    //             createFormationTrack( RimFractureModelPlot* plot, RimFractureModel* fractureModel, RimEclipseCase*
-    //             eclipseCase );
+    static void
+                createFormationTrack( RimFractureModelPlot* plot, RimFractureModel* fractureModel, RimEclipseCase* eclipseCase );
     static void createParametersTrack( RimFractureModelPlot* plot,
                                        RimFractureModel*     fractureModel,
                                        RimEclipseCase*       eclipseCase,
-                                       int                   timeStep );
-    // static void createStabilityCurvesTrack( RimFractureModelPlot* plot,
-    //                                         RimFractureModel*     fractureModel,
-    //                                         RimEclipseCase*       eclipseCase,
-    //                                         int                   timeStep );
-    // static void
-    //     createAnglesTrack( RimFractureModelPlot* plot, RimFractureModel* fractureModel, RimEclipseCase* eclipseCase,
-    //     int timeStep );
+                                       int                   timeStep,
+                                       const QString&        resultVariable );
 
     static RimFractureModelPlot* createFractureModelPlot( bool showAfterCreation, const QString& plotDescription );
 
