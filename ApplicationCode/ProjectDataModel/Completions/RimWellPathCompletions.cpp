@@ -116,9 +116,6 @@ RimWellPathCompletions::RimWellPathCompletions()
     m_fractureModelCollection = new RimFractureModelCollection;
     m_fractureModelCollection.uiCapability()->setUiHidden( true );
 
-    // TODO: remove this
-    m_fractureModelCollection->addFractureModel( new RimFractureModel );
-
     CAF_PDM_InitField( &m_wellNameForExport, "WellNameForExport", QString(), "Well Name", "", "", "" );
     m_wellNameForExport.uiCapability()->setUiEditorTypeName( caf::PdmUiLineEditor::uiEditorTypeName() );
 
@@ -287,7 +284,7 @@ std::vector<const RimWellPathComponentInterface*> RimWellPathCompletions::allCom
 //--------------------------------------------------------------------------------------------------
 bool RimWellPathCompletions::hasCompletions() const
 {
-    if ( !fractureCollection()->allFractures().empty() )
+    if ( !fractureCollection()->allFractures().empty() || !fractureModelCollection()->allFractureModels().empty() )
     {
         return true;
     }
