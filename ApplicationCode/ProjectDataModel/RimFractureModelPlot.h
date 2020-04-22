@@ -39,8 +39,6 @@ protected:
     void defineUiOrdering( QString uiConfigName, caf::PdmUiOrdering& uiOrdering ) override;
 
     void onLoadDataAndUpdate() override;
-    void childFieldChangedByUi( const caf::PdmFieldHandle* changedChildField ) override;
-    void initAfterRead() override;
 
 private:
     void applyDataSource();

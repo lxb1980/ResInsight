@@ -20,21 +20,12 @@
 #include "RiaDefines.h"
 #include "RicfCommandObject.h"
 
-// #include "RigFemPartResultsCollection.h"
-// #include "RigFemResultAddress.h"
-// #include "RigGeoMechCaseData.h"
-
 #include "RimEclipseCase.h"
 #include "RimFractureModel.h"
-// #include "RimTools.h"
-// #include "RimWbsParameters.h"
-// #include "RimWellLogCurveCommonDataSource.h"
-// #include "RimWellLogFile.h"
 
 #include "cafPdmBase.h"
 #include "cafPdmFieldIOScriptability.h"
 #include "cafPdmObject.h"
-#include "cafPdmUiComboBoxEditor.h"
 #include "cafPdmUiGroup.h"
 
 CAF_PDM_SOURCE_INIT( RimFractureModelPlot, "FractureModelPlot" );
@@ -54,43 +45,22 @@ RimFractureModelPlot::RimFractureModelPlot()
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-// void RimFractureModelPlot::applyWbsParametersToExtractor( RigGeoMechWellLogExtractor* extractor )
-// {
-//     m_wbsParameters->applyWbsParametersToExtractor( extractor );
-// }
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-// double RimFractureModelPlot::userDefinedValue( const RigWbsParameter& parameter ) const
-// {
-//     return m_wbsParameters->userDefinedValue( parameter );
-// }
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-// void RimFractureModelPlot::copyWbsParameters( const RimWbsParameters* wbsParameters )
-// {
-//     if ( wbsParameters )
-//     {
-//         *m_wbsParameters = *wbsParameters;
-//     }
-// }
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
 void RimFractureModelPlot::setFractureModel( RimFractureModel* fractureModel )
 {
     m_fractureModel = fractureModel;
 }
 
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
 void RimFractureModelPlot::setEclipseCase( RimEclipseCase* eclipseCase )
 {
     m_eclipseCase = eclipseCase;
 }
 
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
 void RimFractureModelPlot::setTimeStep( int timeStep )
 {
     m_timeStep = timeStep;
@@ -101,19 +71,14 @@ void RimFractureModelPlot::setTimeStep( int timeStep )
 //--------------------------------------------------------------------------------------------------
 void RimFractureModelPlot::defineUiOrdering( QString uiConfigName, caf::PdmUiOrdering& uiOrdering )
 {
-    // m_commonDataSource->uiOrdering( RimWellLogCurveCommonDataSource::smoothingUiOrderinglabel(), uiOrdering );
+    caf::PdmUiGroup* depthGroup = uiOrdering.addNewGroup( "Depth Axis" );
+    RimDepthTrackPlot::uiOrderingForDepthAxis( uiConfigName, *depthGroup );
 
-    // caf::PdmUiGroup* parametersGroup = uiOrdering.addNewGroup( "Parameter Sources" );
-    // m_wbsParameters->uiOrdering( uiConfigName, *parametersGroup );
+    caf::PdmUiGroup* titleGroup = uiOrdering.addNewGroup( "Plot Title" );
+    RimDepthTrackPlot::uiOrderingForAutoName( uiConfigName, *titleGroup );
 
-    // caf::PdmUiGroup* depthGroup = uiOrdering.addNewGroup( "Depth Axis" );
-    // RimWellLogPlot::uiOrderingForDepthAxis( uiConfigName, *depthGroup );
-
-    // caf::PdmUiGroup* titleGroup = uiOrdering.addNewGroup( "Plot Title" );
-    // RimWellLogPlot::uiOrderingForAutoName( uiConfigName, *titleGroup );
-
-    // caf::PdmUiGroup* plotLayoutGroup = uiOrdering.addNewGroup( "Plot Layout" );
-    // RimPlotWindow::uiOrderingForPlotLayout( uiConfigName, *plotLayoutGroup );
+    caf::PdmUiGroup* plotLayoutGroup = uiOrdering.addNewGroup( "Plot Layout" );
+    RimPlotWindow::uiOrderingForPlotLayout( uiConfigName, *plotLayoutGroup );
 
     uiOrdering.skipRemainingFields( true );
 }
@@ -123,32 +88,7 @@ void RimFractureModelPlot::defineUiOrdering( QString uiConfigName, caf::PdmUiOrd
 //--------------------------------------------------------------------------------------------------
 void RimFractureModelPlot::onLoadDataAndUpdate()
 {
-    // m_wbsParameters->loadDataAndUpdate();
-    // RimWellLogPlot::onLoadDataAndUpdate();
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-void RimFractureModelPlot::childFieldChangedByUi( const caf::PdmFieldHandle* changedChildField )
-{
-    // if ( changedChildField == &m_commonDataSource )
-    // {
-    //     applyDataSource();
-    // }
-    // else if ( changedChildField == &m_wbsParameters )
-    // {
-    //     this->loadDataAndUpdate();
-    // }
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-void RimFractureModelPlot::initAfterRead()
-{
-    // updateCommonDataSource();
-    // applyDataSource();
+    RimDepthTrackPlot::onLoadDataAndUpdate();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -156,8 +96,5 @@ void RimFractureModelPlot::initAfterRead()
 //--------------------------------------------------------------------------------------------------
 void RimFractureModelPlot::applyDataSource()
 {
-    // m_wbsParameters->setGeoMechCase( dynamic_cast<RimGeoMechCase*>( m_commonDataSource->caseToApply() ) );
-    // m_wbsParameters->setWellPath( m_commonDataSource->wellPathToApply() );
-    // m_wbsParameters->setTimeStep( m_commonDataSource->timeStepToApply() );
     this->updateConnectedEditors();
 }
