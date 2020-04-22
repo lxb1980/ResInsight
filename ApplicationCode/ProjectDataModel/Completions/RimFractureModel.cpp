@@ -315,7 +315,7 @@ void RimFractureModel::updatePositionFromMeasuredDepth()
 void RimFractureModel::updateThicknessDirection()
 {
     // True vertical thickness: just point straight up
-    cvf::Vec3d direction( 0.0, 0.0, 1.0 );
+    cvf::Vec3d direction( 0.0, 0.0, -1.0 );
 
     if ( m_thicknessType() == TRUE_STRATIGRAPHIC_THICKNESS )
     {
@@ -359,7 +359,7 @@ cvf::Vec3d RimFractureModel::calculateTSTDirection() const
     if ( closeCells.empty() )
     {
         // No close cells found: just point straight up
-        return cvf::Vec3d( 0.0, 0.0, 1.0 );
+        return cvf::Vec3d( 0.0, 0.0, -1.0 );
     }
 
     // The stratigraphic thickness is average the averge of normals of the top face
@@ -369,7 +369,7 @@ cvf::Vec3d RimFractureModel::calculateTSTDirection() const
 
         if ( cell.isInvalid() ) continue;
 
-        direction += ( cell.center() - cell.faceCenter( cvf::StructGridInterface::NEG_K ) );
+        direction += ( cell.center() - cell.faceCenter( cvf::StructGridInterface::NEG_K ) ).getNormalized();
     }
 
     return ( direction / static_cast<double>( closeCells.size() ) ).getNormalized();
