@@ -17,12 +17,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include "RiaApplication.h"
-//#include "RiaColorTables.h"
-//#include "RiaFractureDefines.h"
-
-// #include "RigCellGeometryTools.h"
-// #include "RigFractureCell.h"
-// #include "RigFractureGrid.h"
+#include "RigEclipseCaseData.h"
+#include "RigFractureModelLogExtractor.h"
 #include "RigMainGrid.h"
 #include "RigTesselatorTools.h"
 #include "RigWellPath.h"
@@ -37,7 +33,7 @@
 #include "RivFractureModelPartMgr.h"
 #include "RivObjectSourceInfo.h"
 #include "RivPartPriority.h"
-//#include "RivPipeGeometryGenerator.h"
+#include "RivPipeGeometryGenerator.h"
 
 #include "cafDisplayCoordTransform.h"
 #include "cafEffectGenerator.h"
@@ -77,8 +73,26 @@ void RivFractureModelPartMgr::appendGeometryPartsToModel( cvf::ModelBasicList* m
     if ( !m_rimFractureModel->isChecked() ) return;
 
     cvf::Collection<cvf::Part> parts;
-    auto                       part = createEllipseSurfacePart( eclView );
-    if ( part.notNull() ) parts.push_back( part.p() );
+
+    auto ellipsePart = createEllipseSurfacePart( eclView );
+    if ( ellipsePart.notNull() ) parts.push_back( ellipsePart.p() );
+
+    // TODO: This is a bit weird..
+    RimEclipseCase* eclipseCase = eclView.eclipseCase();
+    if ( eclipseCase )
+    {
+        RigFractureModelLogExtractor extractor( eclipseCase->eclipseCaseData(),
+                                                m_rimFractureModel->anchorPosition(),
+                                                m_rimFractureModel->thicknessDirection(),
+                                                0.0 );
+
+        auto pipePart = createPipeSurfacePart( eclView, extractor.wellPathData() );
+        if ( pipePart.notNull() ) parts.push_back( pipePart.p() );
+    }
+    else
+    {
+        std::cout << "NO ECLIPSE CASE FOUND!!" << std::endl;
+    }
 
     for ( auto& part : parts )
     {
@@ -196,4 +210,96 @@ cvf::ref<cvf::DrawableGeo>
     geo->computeNormals();
 
     return geo;
+}
+
+cvf::ref<cvf::Part> RivFractureModelPartMgr::createPipeSurfacePart( const RimEclipseView& activeView,
+                                                                    const RigWellPath*    wellPath )
+{
+    auto displayCoordTransform = activeView.displayCoordTransform();
+    if ( displayCoordTransform.isNull() ) return nullptr;
+
+    const std::vector<cvf::Vec3d>& wellpathCenterLine = wellPath->m_wellPathPoints;
+
+    if ( wellpathCenterLine.size() < 2 ) return nullptr;
+
+    // TODO: improve this!!
+    double wellPathRadius = 10.0; // this->wellPathRadius( characteristicCellSize, wellPathCollection );
+
+    std::vector<cvf::Vec3d> clippedWellPathCenterLine;
+
+    // Generate the well path geometry as a line and pipe structure
+
+    RivPipeGeometryGenerator pipeGeomGenerator;
+
+    pipeGeomGenerator.setRadius( wellPathRadius );
+    // TODO: use well path collection??
+    pipeGeomGenerator.setCrossSectionVertexCount( 20 ); // wellPathCollection->wellPathCrossSectionVertexCount() );
+
+    double horizontalLengthAlongWellToClipPoint = 0.0;
+    size_t idxToFirstVisibleSegment             = 0;
+    // if ( wellPathCollection->wellPathClip )
+    // {
+    //     double maxZClipHeight     = wellPathClipBoundingBox.max().z() + wellPathCollection->wellPathClipZDistance;
+    //     clippedWellPathCenterLine = RigWellPath::clipPolylineStartAboveZ( wellpathCenterLine,
+    //                                                                       maxZClipHeight,
+    //                                                                       &horizontalLengthAlongWellToClipPoint,
+    //                                                                       &idxToFirstVisibleSegment );
+    // }
+    // else
+    // {
+    clippedWellPathCenterLine = wellpathCenterLine;
+    // }
+
+    if ( clippedWellPathCenterLine.size() < 2 ) return nullptr;
+
+    cvf::ref<cvf::Vec3dArray> cvfCoords = new cvf::Vec3dArray( clippedWellPathCenterLine.size() );
+
+    // Scale the centerline coordinates using the Z-scale transform of the grid and correct for the display offset.
+
+    // if ( doFlatten )
+    // {
+    //     cvf::Vec3d              dummy;
+    //     std::vector<cvf::Mat4d> flatningCSs =
+    //         RivSectionFlattner::calculateFlatteningCSsForPolyline( clippedWellPathCenterLine,
+    //                                                                cvf::Vec3d::Z_AXIS,
+    //                                                                {horizontalLengthAlongWellToClipPoint,
+    //                                                                 0.0,
+    //                                                                 clippedWellPathCenterLine[0].z()},
+    //                                                                &dummy );
+
+    //     for ( size_t cIdx = 0; cIdx < cvfCoords->size(); ++cIdx )
+    //     {
+    //         auto clpoint         = clippedWellPathCenterLine[cIdx].getTransformedPoint( flatningCSs[cIdx] );
+    //         ( *cvfCoords )[cIdx] = displayCoordTransform->scaleToDisplaySize( clpoint );
+    //     }
+    // }
+    // else
+    // {
+    for ( size_t cIdx = 0; cIdx < cvfCoords->size(); ++cIdx )
+    {
+        ( *cvfCoords )[cIdx] = displayCoordTransform->transformToDisplayCoord( clippedWellPathCenterLine[cIdx] );
+    }
+    // }
+
+    pipeGeomGenerator.setFirstVisibleSegmentIndex( idxToFirstVisibleSegment );
+    pipeGeomGenerator.setPipeCenterCoords( cvfCoords.p() );
+    cvf::ref<cvf::DrawableGeo> surfaceDrawable = pipeGeomGenerator.createPipeSurface();
+    //    m_centerLineDrawable = pipeGeomGenerator.createCenterLine();
+
+    if ( surfaceDrawable.notNull() )
+    {
+        cvf::ref<cvf::Part> surfacePart = new cvf::Part;
+        surfacePart->setDrawable( surfaceDrawable.p() );
+
+        // RivWellPathSourceInfo* sourceInfo = new RivWellPathSourceInfo( m_rimWellPath, m_pipeGeomGenerator.p() );
+        // m_surfacePart->setSourceInfo( sourceInfo );
+
+        caf::SurfaceEffectGenerator surfaceGen( cvf::Color4f( cvf::Color3::RED ), caf::PO_1 );
+        cvf::ref<cvf::Effect>       eff = surfaceGen.generateCachedEffect();
+
+        surfacePart->setEffect( eff.p() );
+        return surfacePart;
+    }
+
+    return nullptr;
 }

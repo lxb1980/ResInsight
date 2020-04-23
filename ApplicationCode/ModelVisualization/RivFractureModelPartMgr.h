@@ -44,6 +44,7 @@ class DisplayCoordTransform;
 
 class RimFractureModel;
 class RimEclipseView;
+class RigWellPath;
 
 //--------------------------------------------------------------------------------------------------
 ///
@@ -69,10 +70,7 @@ private:
     static cvf::ref<cvf::DrawableGeo> buildDrawableGeoFromTriangles( const std::vector<cvf::uint>&  triangleIndices,
                                                                      const std::vector<cvf::Vec3f>& nodeCoords );
 
-    // static cvf::ref<cvf::Transform> createLocalTransformFromTranslation( const cvf::Vec3d& translation );
-    // static void                     addPartAtPositiveAndNegativeTranslation( cvf::ModelBasicList* model,
-    //                                                                          cvf::Part*           part,
-    //                                                                          const cvf::Vec3d&    translation );
+    cvf::ref<cvf::Part> createPipeSurfacePart( const RimEclipseView& activeView, const RigWellPath* wellPath );
 
 private:
     caf::PdmPointer<RimFractureModel> m_rimFractureModel;
