@@ -82,6 +82,10 @@ public:
     void setMinimumCommunication( double minimumCommunication );
     void setAquiferCellThreshold( double aquiferCellThreshold );
 
+    caf::FontTools::FontSize fontSize() const override;
+    void                     resetToDefaultFontSize() override;
+    bool                     hasDefaultFontSize() const override;
+
 protected:
     // RimViewWindow overrides
 

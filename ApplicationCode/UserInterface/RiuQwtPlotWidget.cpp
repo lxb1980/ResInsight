@@ -172,14 +172,14 @@ void RiuQwtPlotWidget::setAxisFontsAndAlignment( QwtPlot::Axis axis,
 {
     // Axis number font
     QFont axisFont = this->axisFont( axis );
-    axisFont.setPixelSize( RiaFontCache::pointSizeToPixelSize( valueFontSize ) );
+    axisFont.setPixelSize( caf::FontTools::pointSizeToPixelSize( valueFontSize ) );
     axisFont.setBold( false );
     this->setAxisFont( axis, axisFont );
 
     // Axis title font
     QwtText axisTitle     = this->axisTitle( axis );
     QFont   axisTitleFont = axisTitle.font();
-    axisTitleFont.setPixelSize( RiaFontCache::pointSizeToPixelSize( titleFontSize ) );
+    axisTitleFont.setPixelSize( caf::FontTools::pointSizeToPixelSize( titleFontSize ) );
     axisTitleFont.setBold( titleBold );
     axisTitle.setFont( axisTitleFont );
     axisTitle.setRenderFlags( alignment | Qt::TextWordWrap );
@@ -247,7 +247,7 @@ void RiuQwtPlotWidget::setPlotTitleFontSize( int titleFontSize )
 {
     auto  title = this->title();
     QFont font  = title.font();
-    font.setPixelSize( RiaFontCache::pointSizeToPixelSize( titleFontSize ) );
+    font.setPixelSize( caf::FontTools::pointSizeToPixelSize( titleFontSize ) );
     title.setFont( font );
     setTitle( title );
 }
@@ -260,7 +260,7 @@ void RiuQwtPlotWidget::setLegendFontSize( int fontSize )
     if ( legend() )
     {
         QFont font = legend()->font();
-        font.setPixelSize( RiaFontCache::pointSizeToPixelSize( fontSize ) );
+        font.setPixelSize( caf::FontTools::pointSizeToPixelSize( fontSize ) );
         legend()->setFont( font );
         // Set font size for all existing labels
         QList<QwtLegendLabel*> labels = legend()->findChildren<QwtLegendLabel*>();

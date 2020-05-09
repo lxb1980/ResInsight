@@ -730,65 +730,6 @@ void RimGridCrossPlot::setYAxisInverted( bool inverted )
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-bool RimGridCrossPlot::hasCustomFontSizes( RiaDefines::FontSettingType fontSettingType, int defaultFontSize ) const
-{
-    if ( fontSettingType != RiaDefines::FontSettingType::PLOT_FONT ) return false;
-
-    for ( auto plotAxis : allPlotAxes() )
-    {
-        if ( plotAxis->titleFontSize() != defaultFontSize || plotAxis->valuesFontSize() != defaultFontSize )
-        {
-            return true;
-        }
-    }
-
-    if ( legendFontSize() != defaultFontSize )
-    {
-        return true;
-    }
-    return false;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-bool RimGridCrossPlot::applyFontSize( RiaDefines::FontSettingType fontSettingType,
-                                      int                         oldFontSize,
-                                      int                         fontSize,
-                                      bool                        forceChange /*= false*/ )
-{
-    bool anyChange = false;
-    if ( fontSettingType == RiaDefines::FontSettingType::PLOT_FONT && m_plotWidget )
-    {
-        for ( auto plotAxis : allPlotAxes() )
-        {
-            if ( forceChange || plotAxis->titleFontSize() == oldFontSize )
-            {
-                plotAxis->setTitleFontSize( fontSize );
-                anyChange = true;
-            }
-            if ( forceChange || plotAxis->valuesFontSize() == oldFontSize )
-            {
-                plotAxis->setValuesFontSize( fontSize );
-                anyChange = true;
-            }
-        }
-
-        if ( forceChange || legendFontSize() == oldFontSize )
-        {
-            setLegendFontSize( fontSize );
-
-            anyChange = true;
-        }
-
-        if ( anyChange ) loadDataAndUpdate();
-    }
-    return anyChange;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
 void RimGridCrossPlot::doUpdateLayout()
 {
     updateLegend();
@@ -1059,7 +1000,7 @@ void RimGridCrossPlot::setShowInfoBox( bool enable )
 //--------------------------------------------------------------------------------------------------
 std::set<RimPlotAxisPropertiesInterface*> RimGridCrossPlot::allPlotAxes() const
 {
-    return {m_xAxisProperties, m_yAxisProperties};
+    return { m_xAxisProperties, m_yAxisProperties };
 }
 
 //--------------------------------------------------------------------------------------------------

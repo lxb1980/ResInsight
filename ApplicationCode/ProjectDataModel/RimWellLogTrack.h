@@ -201,12 +201,6 @@ public:
 
     QString asciiDataForPlotExport() const override;
 
-    bool hasCustomFontSizes( RiaDefines::FontSettingType fontSettingType, int defaultFontSize ) const override;
-    bool applyFontSize( RiaDefines::FontSettingType fontSettingType,
-                        int                         oldFontSize,
-                        int                         fontSize,
-                        bool                        forceChange = false ) override;
-
     void onAxisSelected( int axis, bool toggle ) override;
 
     void updateAxes() override;
@@ -226,6 +220,8 @@ private:
 
     void updateXZoom();
     void updateYZoom();
+
+    int axisFontSize() const;
 
     void doRemoveFromCollection() override;
 
@@ -304,6 +300,8 @@ private:
     caf::PdmField<bool>                         m_explicitTickIntervals;
     caf::PdmField<double>                       m_majorTickInterval;
     caf::PdmField<double>                       m_minorTickInterval;
+
+    caf::PdmField<caf::FontTools::DeltaSizeEnum> m_axisFontSize;
 
     caf::PdmField<RegionAnnotationTypeEnum>                            m_regionAnnotationType;
     caf::PdmField<RegionAnnotationDisplayEnum>                         m_regionAnnotationDisplay;

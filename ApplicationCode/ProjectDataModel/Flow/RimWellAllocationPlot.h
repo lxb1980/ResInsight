@@ -89,6 +89,10 @@ public:
 
     void showPlotLegend( bool doShow );
 
+    caf::FontTools::FontSize fontSize() const override;
+    void                     resetToDefaultFontSize() override;
+    bool                     hasDefaultFontSize() const override;
+
 protected:
     // Overridden PDM methods
     caf::PdmFieldHandle* userDescriptionField() override { return &m_userName; }

@@ -18,6 +18,8 @@
 
 #include "RimAnnotationInViewCollection.h"
 
+#include "RiaPreferences.h"
+
 #include "RimAnnotationCollection.h"
 #include "RimAnnotationGroupCollection.h"
 #include "RimAnnotationTextAppearance.h"
@@ -244,55 +246,26 @@ void RimAnnotationInViewCollection::onGlobalCollectionChanged( const RimAnnotati
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-bool RimAnnotationInViewCollection::hasTextAnnotationsWithCustomFontSize( RiaFontCache::FontSize defaultFontSize ) const
+caf::FontTools::FontSize RimAnnotationInViewCollection::fontSize() const
 {
-    for ( auto annotation : textAnnotations() )
-    {
-        if ( annotation->appearance()->fontSize() != defaultFontSize )
-        {
-            return true;
-        }
-    }
-
-    for ( auto annotationInView : globalTextAnnotations() )
-    {
-        if ( annotationInView->sourceAnnotation()->appearance()->fontSize() != defaultFontSize )
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return m_annotationFontSize();
 }
 
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-bool RimAnnotationInViewCollection::applyFontSizeToAllTextAnnotations( RiaFontCache::FontSize oldFontSize,
-                                                                       RiaFontCache::FontSize fontSize,
-                                                                       bool                   forceChange )
+bool RimAnnotationInViewCollection::hasDefaultFontSize() const
 {
-    bool anyChange = false;
-    for ( auto annotation : textAnnotations() )
-    {
-        if ( forceChange || annotation->appearance()->fontSize() == oldFontSize )
-        {
-            annotation->appearance()->setFontSize( fontSize );
-            annotation->updateConnectedEditors();
-            anyChange = true;
-        }
-    }
+    return RiaPreferences::current()->defaultAnnotationFontSize() == m_annotationFontSize();
+}
 
-    for ( auto annotationInView : globalTextAnnotations() )
-    {
-        if ( forceChange || annotationInView->sourceAnnotation()->appearance()->fontSize() == oldFontSize )
-        {
-            annotationInView->sourceAnnotation()->appearance()->setFontSize( fontSize );
-            annotationInView->updateConnectedEditors();
-            anyChange = true;
-        }
-    }
-    return anyChange;
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+void RimAnnotationInViewCollection::resetToDefaultFontSize()
+{
+    m_annotationFontSize = RiaPreferences::current()->defaultAnnotationFontSize();
+    scheduleRedrawOfRelevantViews();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -301,6 +274,7 @@ bool RimAnnotationInViewCollection::applyFontSizeToAllTextAnnotations( RiaFontCa
 void RimAnnotationInViewCollection::defineUiOrdering( QString uiConfigName, caf::PdmUiOrdering& uiOrdering )
 {
     uiOrdering.add( &m_snapAnnotations );
+    uiOrdering.add( &m_annotationFontSize );
     if ( m_snapAnnotations() ) uiOrdering.add( &m_annotationPlaneDepth );
 
     uiOrdering.skipRemainingFields( true );

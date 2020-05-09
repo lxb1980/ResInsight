@@ -1394,7 +1394,8 @@ void RiaGuiApplication::onProgramExit()
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-void RiaGuiApplication::applyGuiPreferences( const RiaPreferences* oldPreferences )
+void RiaGuiApplication::applyGuiPreferences( const RiaPreferences*                         oldPreferences,
+                                             const std::vector<caf::FontHolderInterface*>& defaultFontObjects )
 {
     if ( m_activeReservoirView && m_activeReservoirView->viewer() )
     {
@@ -1419,7 +1420,10 @@ void RiaGuiApplication::applyGuiPreferences( const RiaPreferences* oldPreference
                 m_preferences->appendClassNameToUiText() );
     }
 
-    std::map<RiaDefines::FontSettingType, RiaFontCache::FontSize> fontSizes = m_preferences->defaultFontSizes();
+    for ( auto fontObject : defaultFontObjects )
+    {
+        fontObject->resetToDefaultFontSize();
+    }
 
     if ( this->project() )
     {
@@ -1458,13 +1462,6 @@ void RiaGuiApplication::applyGuiPreferences( const RiaPreferences* oldPreference
                         existingViewsWithCustomZScale = true;
                     }
 
-                    RimGridView* gridView = dynamic_cast<RimGridView*>( rim3dView );
-                    if ( gridView && gridView->annotationCollection() )
-                    {
-                        RiaFontCache::FontSize oldFontSize = oldPreferences->defaultAnnotationFontSize();
-                        existingObjectsWithCustomFonts =
-                            gridView->annotationCollection()->hasTextAnnotationsWithCustomFontSize( oldFontSize );
-                    }
                     RimEclipseView* eclipseView = dynamic_cast<RimEclipseView*>( rim3dView );
                     if ( eclipseView )
                     {
@@ -1473,18 +1470,6 @@ void RiaGuiApplication::applyGuiPreferences( const RiaPreferences* oldPreference
                              eclipseView->wellCollection()->wellLabelColor() != m_preferences->defaultWellLabelColor() )
                         {
                             existingViewsWithCustomColors = true;
-                        }
-                    }
-                }
-
-                for ( auto fontTypeSizePair : fontSizes )
-                {
-                    RiaFontCache::FontSize oldFontSize = oldPreferences->defaultFontSizes()[fontTypeSizePair.first];
-                    if ( oldFontSize != fontTypeSizePair.second )
-                    {
-                        if ( viewWindow->hasCustomFontSizes( fontTypeSizePair.first, oldFontSize ) )
-                        {
-                            existingObjectsWithCustomFonts = true;
                         }
                     }
                 }
@@ -1526,16 +1511,6 @@ void RiaGuiApplication::applyGuiPreferences( const RiaPreferences* oldPreference
 
         for ( auto viewWindow : allViewWindows )
         {
-            for ( auto fontTypeSizePair : fontSizes )
-            {
-                RiaFontCache::FontSize oldFontSize = oldPreferences->defaultFontSizes()[fontTypeSizePair.first];
-                int                    newFontSize = fontTypeSizePair.second;
-                if ( oldFontSize != newFontSize )
-                {
-                    viewWindow->applyFontSize( fontTypeSizePair.first, oldFontSize, newFontSize, applySettingsToAllViews );
-                }
-            }
-
             auto rim3dView = dynamic_cast<Rim3dView*>( viewWindow );
             if ( rim3dView )
             {

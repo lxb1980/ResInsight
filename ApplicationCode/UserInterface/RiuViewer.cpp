@@ -97,7 +97,9 @@ RiuViewer::RiuViewer( const QGLFormat& format, QWidget* parent )
 {
     cvf::Font* standardFont = RiaGuiApplication::instance()->defaultSceneFont();
     QFont      font         = RiaGuiApplication::instance()->font();
-    font.setPointSize( RiaGuiApplication::instance()->preferences()->defaultSceneFontSize() );
+
+    auto viewFontSize = RiaPreferences::current()->defaultSceneFontSize();
+    font.setPointSize( caf::FontTools::absolutePointSize( viewFontSize ) );
 
     m_axisCross = new cvf::OverlayAxisCross( m_mainCamera.p(), standardFont );
     m_axisCross->setAxisLabels( "X", "Y", "Z" );
@@ -908,7 +910,7 @@ void RiuViewer::updateLegendLayout()
         const int xPos = width() - (int)scaleLegendSize.x() - margin - edgeAxisBorderWidth;
         const int yPos = margin + edgeAxisBorderHeight + margin + otherItemsHeight;
 
-        m_scaleLegend->setLayoutFixedPosition( {xPos, yPos} );
+        m_scaleLegend->setLayoutFixedPosition( { xPos, yPos } );
     }
 }
 
@@ -1285,9 +1287,9 @@ void RiuViewer::showScaleLegend( bool show )
     if ( show )
     {
         if ( m_scaleLegend->orientation() == caf::OverlayScaleLegend::HORIZONTAL )
-            m_scaleLegend->setRenderSize( {280, 45} );
+            m_scaleLegend->setRenderSize( { 280, 45 } );
         else
-            m_scaleLegend->setRenderSize( {50, 280} );
+            m_scaleLegend->setRenderSize( { 50, 280 } );
 
         overlayItemsRendering()->addOverlayItem( m_scaleLegend.p() );
     }
@@ -1318,17 +1320,24 @@ void RiuViewer::clearHoverCursor()
 //--------------------------------------------------------------------------------------------------
 void RiuViewer::updateFonts()
 {
-    cvf::Font* standardFont = RiaGuiApplication::instance()->defaultSceneFont();
+    auto       defaultFontSize = RiaApplication::instance()->preferences()->defaultSceneFontSize();
+    auto       viewFontSize    = ownerViewWindow()->fontSize();
+    cvf::Font* axisFont        = RiaGuiApplication::instance()->defaultSceneFont();
+    QFont      font            = QApplication::font();
+    font.setPointSize( caf::FontTools::absolutePointSize( viewFontSize ) );
+
+    if ( RiaPreferences::current()->defaultSceneFontSize() != ownerViewWindow()->fontSize() )
+    {
+        axisFont = RiaFontCache::getFont( viewFontSize ).p();
+    }
+
     overlayItemsRendering()->removeOverlayItem( m_axisCross.p() );
 
-    m_axisCross = new cvf::OverlayAxisCross( m_mainCamera.p(), standardFont );
+    m_axisCross = new cvf::OverlayAxisCross( m_mainCamera.p(), axisFont );
     m_axisCross->setAxisLabels( "X", "Y", "Z" );
     m_axisCross->setLayout( cvf::OverlayItem::VERTICAL, cvf::OverlayItem::BOTTOM_RIGHT );
     overlayItemsRendering()->addOverlayItem( m_axisCross.p() );
     m_showAxisCross = true;
-
-    QFont font = QApplication::font();
-    font.setPointSize( RiaApplication::instance()->preferences()->defaultSceneFontSize() );
 
     m_zScaleLabel->setFont( font );
     m_infoLabel->setFont( font );

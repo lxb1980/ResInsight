@@ -98,10 +98,8 @@ RimSummaryTimeAxisProperties::RimSummaryTimeAxisProperties()
     m_visibleTimeSinceStartRangeMin.uiCapability()->setUiEditorTypeName( caf::PdmUiLineEditor::uiEditorTypeName() );
 
     CAF_PDM_InitFieldNoDefault( &m_titlePositionEnum, "TitlePosition", "Title Position", "", "", "" );
-    CAF_PDM_InitField( &m_titleFontSize, "FontSize", 10, "Font Size", "", "", "" );
-    m_titleFontSize = RiaApplication::instance()->preferences()->defaultPlotFontSize();
-    CAF_PDM_InitField( &m_valuesFontSize, "ValuesFontSize", 10, "Font Size", "", "", "" );
-    m_valuesFontSize = RiaApplication::instance()->preferences()->defaultPlotFontSize();
+    CAF_PDM_InitFieldNoDefault( &m_titleFontSize, "FontSize", "Font Size", "", "", "" );
+    CAF_PDM_InitFieldNoDefault( &m_valuesFontSize, "ValuesFontSize", "Font Size", "", "", "" );
 
     CAF_PDM_InitField( &m_automaticDateComponents, "AutoDate", true, "Automatic Date/Time Labels", "", "", "" );
     CAF_PDM_InitFieldNoDefault( &m_dateComponents, "DateComponents", "Set Date Label", "", "", "" );
@@ -137,15 +135,7 @@ RimPlotAxisPropertiesInterface::AxisTitlePositionType RimSummaryTimeAxisProperti
 //--------------------------------------------------------------------------------------------------
 int RimSummaryTimeAxisProperties::titleFontSize() const
 {
-    return m_titleFontSize;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-void RimSummaryTimeAxisProperties::setTitleFontSize( int fontSize )
-{
-    m_titleFontSize = fontSize;
+    return caf::FontTools::absolutePointSize( plotFontSize(), m_titleFontSize() );
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -153,15 +143,22 @@ void RimSummaryTimeAxisProperties::setTitleFontSize( int fontSize )
 //--------------------------------------------------------------------------------------------------
 int RimSummaryTimeAxisProperties::valuesFontSize() const
 {
-    return m_valuesFontSize;
+    return caf::FontTools::absolutePointSize( plotFontSize(), m_valuesFontSize() );
 }
 
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-void RimSummaryTimeAxisProperties::setValuesFontSize( int fontSize )
+caf::FontTools::FontSize RimSummaryTimeAxisProperties::plotFontSize() const
 {
-    m_valuesFontSize = fontSize;
+    RimPlotWindow* plot = nullptr;
+    this->firstAncestorOrThisOfType( plot );
+    caf::FontTools::FontSize plotFontSize = RiaPreferences::current()->defaultPlotFontSize();
+    if ( plot )
+    {
+        plotFontSize = plot->fontSize();
+    }
+    return plotFontSize;
 }
 
 //--------------------------------------------------------------------------------------------------

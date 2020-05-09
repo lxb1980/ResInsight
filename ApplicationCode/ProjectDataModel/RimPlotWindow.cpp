@@ -55,8 +55,14 @@ RimPlotWindow::RimPlotWindow()
     CAF_PDM_InitField( &m_showPlotLegends, "ShowTrackLegends", true, "Show Legends", "", "", "" );
     CAF_PDM_InitField( &m_plotLegendsHorizontal, "TrackLegendsHorizontal", true, "Legend Orientation", "", "", "" );
     m_plotLegendsHorizontal.uiCapability()->setUiEditorTypeName( caf::PdmUiComboBoxEditor::uiEditorTypeName() );
-    int defaultFontSize = RiaApplication::instance()->preferences()->defaultPlotFontSize();
-    CAF_PDM_InitField( &m_legendFontSize, "LegendFontSize", std::max( 8, defaultFontSize - 2 ), "Legend Font Size", "", "", "" );
+
+    CAF_PDM_InitFieldNoDefault( &m_mainFontSize, "MainFontSize", "Main Font Size", "", "", "" );
+    CAF_PDM_InitFieldNoDefault( &m_titleFontSize, "TitleFontSize", "Title Font Size", "", "", "" );
+    CAF_PDM_InitFieldNoDefault( &m_legendFontSize, "LegendDeltaFontSize", "Legend Font Size", "", "", "" );
+
+    m_mainFontSize   = RiaPreferences::current()->defaultPlotFontSize();
+    m_titleFontSize  = caf::FontTools::DeltaSize::Large;
+    m_legendFontSize = caf::FontTools::DeltaSize::Small;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -81,6 +87,8 @@ RimPlotWindow& RimPlotWindow::operator=( RimPlotWindow&& rhs )
 {
     m_showPlotLegends       = rhs.m_showPlotLegends();
     m_plotLegendsHorizontal = rhs.m_plotLegendsHorizontal();
+    m_mainFontSize          = rhs.m_mainFontSize();
+    m_titleFontSize         = rhs.m_titleFontSize();
     m_legendFontSize        = rhs.m_legendFontSize();
     return *this;
 }
@@ -120,17 +128,50 @@ void RimPlotWindow::setLegendsHorizontal( bool horizontal )
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-int RimPlotWindow::legendFontSize() const
+caf::FontTools::FontSize RimPlotWindow::fontSize() const
 {
-    return m_legendFontSize;
+    return m_mainFontSize();
 }
 
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-void RimPlotWindow::setLegendFontSize( int fontSize )
+bool RimPlotWindow::hasDefaultFontSize() const
 {
-    m_legendFontSize = fontSize;
+    return RiaApplication::instance()->preferences()->defaultSceneFontSize() == m_mainFontSize();
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+void RimPlotWindow::resetToDefaultFontSize()
+{
+    m_mainFontSize = RiaApplication::instance()->preferences()->defaultSceneFontSize();
+    updateLayout();
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+int RimPlotWindow::titleFontSize() const
+{
+    return caf::FontTools::absolutePointSize( m_mainFontSize(), m_titleFontSize() );
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+int RimPlotWindow::regularFontSize() const
+{
+    return caf::FontTools::absolutePointSize( m_mainFontSize(), caf::FontTools::DeltaSize::Medium );
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+int RimPlotWindow::legendFontSize() const
+{
+    return caf::FontTools::absolutePointSize( m_mainFontSize(), m_legendFontSize() );
 }
 
 //--------------------------------------------------------------------------------------------------

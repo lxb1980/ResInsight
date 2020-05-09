@@ -133,9 +133,9 @@ RiuMultiPlotBook::RiuMultiPlotBook( RimMultiPlot* plotDefinition, QWidget* paren
 
     setFocusPolicy( Qt::StrongFocus );
 
-    RiaApplication* app             = RiaApplication::instance();
-    int             defaultFontSize = app->preferences()->defaultPlotFontSize();
-    setFontSize( defaultFontSize );
+    setFontSizes( m_plotDefinition->titleFontSize(),
+                  m_plotDefinition->titleFontSize() - 1,
+                  m_plotDefinition->regularFontSize() );
 
     QSize pageSize = m_plotDefinition->pageLayout().fullRectPixels( RiaGuiApplication::applicationResolution() ).size();
     setBookSize( pageSize.width() );
@@ -229,26 +229,18 @@ void RiuMultiPlotBook::setSubTitlesVisible( bool visible )
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-void RiuMultiPlotBook::setFontSize( int fontSize )
+void RiuMultiPlotBook::setFontSizes( int titleFontSize, int subTitleFontSize, int regularFontSize )
 {
     QFont font      = this->font();
-    int   pixelSize = RiaFontCache::pointSizeToPixelSize( fontSize );
+    int   pixelSize = caf::FontTools::pointSizeToPixelSize( regularFontSize );
 
     font.setPixelSize( pixelSize );
     this->setFont( font );
 
     for ( auto page : m_pages )
     {
-        page->setFontSize( fontSize );
+        page->setFontSizes( titleFontSize, subTitleFontSize, regularFontSize );
     }
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-int RiuMultiPlotBook::fontSize() const
-{
-    return RiaFontCache::pixelSizeToPointSize( this->font().pixelSize() );
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -512,7 +504,9 @@ RiuMultiPlotPage* RiuMultiPlotBook::createPage()
 
     // Reapply plot settings
     page->setPlotTitle( m_plotTitle );
-    page->setFontSize( RiaApplication::instance()->preferences()->defaultPlotFontSize() );
+    page->setFontSizes( m_plotDefinition->titleFontSize(),
+                        m_plotDefinition->titleFontSize() - 1,
+                        m_plotDefinition->regularFontSize() );
     page->setTitleVisible( m_titleVisible );
     page->setSubTitlesVisible( m_subTitlesVisible );
     page->setPreviewModeEnabled( m_previewMode );

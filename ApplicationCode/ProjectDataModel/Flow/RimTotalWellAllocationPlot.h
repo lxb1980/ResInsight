@@ -69,6 +69,10 @@ public:
     QWidget* createViewWidget( QWidget* mainWindowParent ) override;
     void     deleteViewWidget() override;
 
+    caf::FontTools::FontSize fontSize() const override;
+    void                     resetToDefaultFontSize() override;
+    bool                     hasDefaultFontSize() const override;
+
 protected:
     // RimViewWindow overrides
 

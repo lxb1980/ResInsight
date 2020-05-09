@@ -79,8 +79,7 @@ public:
 
     void setPlotTitle( const QString& plotTitle );
     void setTitleVisible( bool visible );
-    void setFontSize( int fontSize );
-    int  fontSize() const;
+    void setFontSizes( int titleFontSize, int subTitleFontSize, int regularFontSize );
     void setSubTitlesVisible( bool visible );
 
     bool previewModeEnabled() const;

@@ -502,7 +502,7 @@ void RimCorrelationMatrixPlot::createMatrix()
             cvf::Color3f contrastColor = RiaColorTools::contrastColor( cvf::Color3f( color ) );
             textLabel.setColor( RiaColorTools::toQColor( contrastColor ) );
             QFont font = textLabel.font();
-            font.setPixelSize( RiaFontCache::pointSizeToPixelSize( 7 ) );
+            font.setPixelSize( caf::FontTools::pointSizeToPixelSize( 7 ) );
             textLabel.setFont( font );
             QwtPlotMarker* marker = new QwtPlotMarker();
             marker->setLabel( textLabel );

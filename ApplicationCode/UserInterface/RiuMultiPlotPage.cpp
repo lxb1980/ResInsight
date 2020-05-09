@@ -109,9 +109,9 @@ RiuMultiPlotPage::RiuMultiPlotPage( RimPlotWindow* plotDefinition, QWidget* pare
 
     setFocusPolicy( Qt::StrongFocus );
 
-    RiaApplication* app             = RiaApplication::instance();
-    int             defaultFontSize = app->preferences()->defaultPlotFontSize();
-    setFontSize( defaultFontSize );
+    setFontSizes( m_plotDefinition->titleFontSize(),
+                  m_plotDefinition->titleFontSize() - 1,
+                  m_plotDefinition->regularFontSize() );
 
     this->setObjectName( QString( "%1" ).arg( reinterpret_cast<uint64_t>( this ) ) );
 
@@ -259,13 +259,20 @@ void RiuMultiPlotPage::setTitleVisible( bool visible )
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-void RiuMultiPlotPage::setFontSize( int fontSize )
+void RiuMultiPlotPage::setFontSizes( int titleFontSize, int subTitleFontSize, int regularFontSize )
 {
-    int pixelSize = RiaFontCache::pointSizeToPixelSize( fontSize );
+    {
+        QFont font      = this->font();
+        int   pixelSize = caf::FontTools::pointSizeToPixelSize( regularFontSize );
+
+        font.setPixelSize( pixelSize );
+        this->setFont( font );
+    }
+
     {
         QFont font = m_plotTitle->font();
 
-        font.setPixelSize( pixelSize + 2 );
+        font.setPixelSize( caf::FontTools::pointSizeToPixelSize( titleFontSize ) );
         font.setBold( true );
         m_plotTitle->setFont( font );
     }
@@ -273,18 +280,10 @@ void RiuMultiPlotPage::setFontSize( int fontSize )
     for ( QLabel* subTitle : m_subTitles )
     {
         QFont font = subTitle->font();
-        font.setPixelSize( pixelSize );
+        font.setPixelSize( caf::FontTools::pointSizeToPixelSize( subTitleFontSize ) );
         font.setBold( true );
         subTitle->setFont( font );
     }
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-int RiuMultiPlotPage::fontSize() const
-{
-    return m_plotTitle->font().pointSize() - 2;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -640,7 +639,7 @@ void RiuMultiPlotPage::reinsertPlotWidgets()
                     }
                     legends[visibleIndex]->setMaxColumns( legendColumns );
                     QFont legendFont = legends[visibleIndex]->font();
-                    legendFont.setPixelSize( RiaFontCache::pointSizeToPixelSize( m_plotDefinition->legendFontSize() ) );
+                    legendFont.setPixelSize( caf::FontTools::pointSizeToPixelSize( m_plotDefinition->legendFontSize() ) );
                     legends[visibleIndex]->setFont( legendFont );
                     legends[visibleIndex]->show();
                 }

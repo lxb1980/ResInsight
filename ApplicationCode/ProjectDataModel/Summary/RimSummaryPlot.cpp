@@ -360,7 +360,7 @@ QString RimSummaryPlot::asciiDataForSummaryPlotExport( RiaQDateTimeTools::DateTi
         populateTimeHistoryCurvesData( m_gridTimeHistoryCurves.childObjects(), &timeHistoryCurvesData );
 
         // Export observed data
-        appendToExportData( out, {summaryCurvesObsData}, showTimeAsLongString );
+        appendToExportData( out, { summaryCurvesObsData }, showTimeAsLongString );
 
         std::vector<CurvesData> exportData( 2 );
 
@@ -379,7 +379,7 @@ QString RimSummaryPlot::asciiDataForSummaryPlotExport( RiaQDateTimeTools::DateTi
         CurvesData asciiCurvesData;
         populateAsciiDataCurvesData( m_asciiDataCurves.childObjects(), &asciiCurvesData );
 
-        appendToExportData( out, {asciiCurvesData}, showTimeAsLongString );
+        appendToExportData( out, { asciiCurvesData }, showTimeAsLongString );
     }
 
     return out;
@@ -725,66 +725,6 @@ void RimSummaryPlot::applyDefaultCurveAppearances()
         if ( curveSet->colorMode() != RimEnsembleCurveSet::ColorMode::SINGLE_COLOR ) continue;
         curveSet->setColor( RiaColorTables::summaryCurveDefaultPaletteColors().cycledColor3f( colorIndex++ ) );
     }
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-bool RimSummaryPlot::hasCustomFontSizes( RiaDefines::FontSettingType fontSettingType, int defaultFontSize ) const
-{
-    if ( fontSettingType == RiaDefines::FontSettingType::PLOT_FONT && m_plotWidget )
-    {
-        for ( auto plotAxis : allPlotAxes() )
-        {
-            if ( plotAxis->titleFontSize() != defaultFontSize || plotAxis->valuesFontSize() != defaultFontSize )
-            {
-                return true;
-            }
-        }
-
-        if ( m_legendFontSize() != defaultFontSize )
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-bool RimSummaryPlot::applyFontSize( RiaDefines::FontSettingType fontSettingType,
-                                    int                         oldFontSize,
-                                    int                         fontSize,
-                                    bool                        forceChange /*= false*/ )
-{
-    bool anyChange = false;
-
-    if ( fontSettingType == RiaDefines::FontSettingType::PLOT_FONT && m_plotWidget )
-    {
-        for ( auto plotAxis : allPlotAxes() )
-        {
-            if ( forceChange || plotAxis->titleFontSize() == oldFontSize )
-            {
-                plotAxis->setTitleFontSize( fontSize );
-                anyChange = true;
-            }
-            if ( forceChange || plotAxis->valuesFontSize() == oldFontSize )
-            {
-                plotAxis->setValuesFontSize( fontSize );
-                anyChange = true;
-            }
-        }
-
-        if ( forceChange || m_legendFontSize() == oldFontSize )
-        {
-            m_legendFontSize = fontSize;
-            anyChange        = true;
-        }
-
-        if ( anyChange ) loadDataAndUpdate();
-    }
-    return anyChange;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1232,7 +1172,7 @@ void RimSummaryPlot::addCurveNoUpdate( RimSummaryCurve* curve )
 //--------------------------------------------------------------------------------------------------
 void RimSummaryPlot::deleteCurve( RimSummaryCurve* curve )
 {
-    deleteCurves( {curve} );
+    deleteCurves( { curve } );
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1477,7 +1417,7 @@ void RimSummaryPlot::onLoadDataAndUpdate()
     if ( m_plotWidget )
     {
         m_plotWidget->setLegendVisible( m_showPlotLegends && isMdiWindow() );
-        m_plotWidget->setLegendFontSize( m_legendFontSize() );
+        m_plotWidget->setLegendFontSize( legendFontSize() );
         m_plotWidget->updateLegend();
     }
     this->updateAxes();
@@ -1540,7 +1480,7 @@ void RimSummaryPlot::updateZoomFromQwt()
 //--------------------------------------------------------------------------------------------------
 std::set<RimPlotAxisPropertiesInterface*> RimSummaryPlot::allPlotAxes() const
 {
-    return {m_timeAxisProperties, m_bottomAxisProperties, m_leftYAxisProperties, m_rightYAxisProperties};
+    return { m_timeAxisProperties, m_bottomAxisProperties, m_leftYAxisProperties, m_rightYAxisProperties };
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2071,13 +2011,13 @@ void populateTimeHistoryCurvesData( std::vector<RimGridTimeHistoryCurve*> curves
             if ( curveCaseName == curvesData->caseNames[i] ) casePosInList = i;
         }
 
-        CurveData curveData = {curve->curveExportDescription(), RifEclipseSummaryAddress(), curve->yValues()};
+        CurveData curveData = { curve->curveExportDescription(), RifEclipseSummaryAddress(), curve->yValues() };
 
         if ( casePosInList == cvf::UNDEFINED_SIZE_T )
         {
             curvesData->caseNames.push_back( curveCaseName );
             curvesData->timeSteps.push_back( curve->timeStepValues() );
-            curvesData->allCurveData.push_back( std::vector<CurveData>( {curveData} ) );
+            curvesData->allCurveData.push_back( std::vector<CurveData>( { curveData } ) );
         }
         else
         {
@@ -2103,13 +2043,13 @@ void populateAsciiDataCurvesData( std::vector<RimAsciiDataCurve*> curves, Curves
 
         size_t casePosInList = cvf::UNDEFINED_SIZE_T;
 
-        CurveData curveData = {curve->curveExportDescription(), RifEclipseSummaryAddress(), curve->yValues()};
+        CurveData curveData = { curve->curveExportDescription(), RifEclipseSummaryAddress(), curve->yValues() };
 
         if ( casePosInList == cvf::UNDEFINED_SIZE_T )
         {
             curvesData->caseNames.push_back( "" );
             curvesData->timeSteps.push_back( curve->timeSteps() );
-            curvesData->allCurveData.push_back( std::vector<CurveData>( {curveData} ) );
+            curvesData->allCurveData.push_back( std::vector<CurveData>( { curveData } ) );
         }
         else
         {
@@ -2146,7 +2086,7 @@ void populateSummaryCurvesData( std::vector<RimSummaryCurve*> curves, SummaryCur
             if ( curveCaseName == curvesData->caseNames[i] ) casePosInList = i;
         }
 
-        CurveData curveData = {curve->curveExportDescription(), curve->summaryAddressY(), curve->valuesY()};
+        CurveData curveData = { curve->curveExportDescription(), curve->summaryAddressY(), curve->valuesY() };
         CurveData errorCurveData;
 
         // Error data
@@ -2167,7 +2107,7 @@ void populateSummaryCurvesData( std::vector<RimSummaryCurve*> curves, SummaryCur
             // 1. Case is not referenced before, or
             // 2. We have calculated data, and it we cannot assume identical time axis
 
-            auto curveDataList = std::vector<CurveData>( {curveData} );
+            auto curveDataList = std::vector<CurveData>( { curveData } );
             if ( hasErrorData ) curveDataList.push_back( errorCurveData );
 
             curvesData->caseNames.push_back( curveCaseName );

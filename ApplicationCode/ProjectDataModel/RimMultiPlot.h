@@ -121,12 +121,6 @@ protected:
     void updateZoom();
     void recreatePlotWidgets();
 
-    bool hasCustomFontSizes( RiaDefines::FontSettingType fontSettingType, int defaultFontSize ) const override;
-    bool applyFontSize( RiaDefines::FontSettingType fontSettingType,
-                        int                         oldFontSize,
-                        int                         fontSize,
-                        bool                        forceChange = false ) override;
-
 private:
     void cleanupBeforeClose();
     void doUpdateLayout() override;

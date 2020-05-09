@@ -73,6 +73,10 @@ public:
     QString               tracerName();
     size_t                timeStep();
 
+    caf::FontTools::FontSize fontSize() const override;
+    void                     resetToDefaultFontSize() override;
+    bool                     hasDefaultFontSize() const override;
+
 protected:
     // RimViewWindow overrides
     void   assignIdIfNecessary() final;

@@ -197,6 +197,8 @@ RimWellLogTrack::RimWellLogTrack()
     m_majorTickInterval.uiCapability()->setUiHidden( true );
     m_minorTickInterval.uiCapability()->setUiHidden( true );
 
+    CAF_PDM_InitFieldNoDefault( &m_axisFontSize, "AxisFontSize", "Axis Font Size", "", "", "" );
+
     CAF_PDM_InitFieldNoDefault( &m_regionAnnotationType, "AnnotationType", "Region Annotations", "", "", "" );
     CAF_PDM_InitFieldNoDefault( &m_regionAnnotationDisplay, "RegionDisplay", "Region Display", "", "", "" );
 
@@ -490,6 +492,14 @@ void RimWellLogTrack::updateYZoom()
     if ( !m_plotWidget ) return;
 
     m_plotWidget->setAxisRange( QwtPlot::yLeft, m_visibleDepthRangeMin(), m_visibleDepthRangeMax() );
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+int RimWellLogTrack::axisFontSize() const
+{
+    return caf::FontTools::absolutePointSize( m_mainFontSize(), m_axisFontSize() );
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -874,38 +884,6 @@ QString RimWellLogTrack::asciiDataForPlotExport() const
     }
 
     return out;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-bool RimWellLogTrack::hasCustomFontSizes( RiaDefines::FontSettingType fontSettingType, int defaultFontSize ) const
-{
-    if ( fontSettingType == RiaDefines::FontSettingType::PLOT_FONT && m_plotWidget )
-    {
-        return defaultFontSize != m_plotWidget->axisTitleFontSize( QwtPlot::xTop );
-    }
-    return false;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-bool RimWellLogTrack::applyFontSize( RiaDefines::FontSettingType fontSettingType,
-                                     int                         oldFontSize,
-                                     int                         fontSize,
-                                     bool                        forceChange /*= false*/ )
-{
-    if ( fontSettingType == RiaDefines::FontSettingType::PLOT_FONT && m_plotWidget )
-    {
-        if ( oldFontSize == m_plotWidget->axisTitleFontSize( QwtPlot::xTop ) || forceChange )
-        {
-            m_plotWidget->setAxisFontsAndAlignment( QwtPlot::xTop, fontSize, fontSize );
-            m_plotWidget->setAxisFontsAndAlignment( QwtPlot::yLeft, fontSize, fontSize );
-            return true;
-        }
-    }
-    return false;
 }
 
 //--------------------------------------------------------------------------------------------------
