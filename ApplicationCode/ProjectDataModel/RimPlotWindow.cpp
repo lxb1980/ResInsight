@@ -297,6 +297,8 @@ void RimPlotWindow::uiOrderingForPlotLayout( QString uiConfigName, caf::PdmUiOrd
 {
     uiOrdering.add( &m_showPlotLegends );
     uiOrdering.add( &m_plotLegendsHorizontal );
+    uiOrdering.add( &m_mainFontSize );
+    uiOrdering.add( &m_titleFontSize );
     uiOrdering.add( &m_legendFontSize );
 }
 

@@ -56,14 +56,14 @@ void RiuDockedQwtPlot::applyFontSizes( bool replot /*= false*/ )
 
     for ( QwtPlot::Axis axis : allAxes )
     {
-        QwtText text = this->axisTitle( axis );
-        QFont   font = text.font();
-        font.setPixelSize( caf::FontTools::pointSizeToPixelSize( axisFontSize ) );
-        text.setFont( font );
+        QwtText text          = this->axisTitle( axis );
+        QFont   axisTitleFont = text.font();
+        axisTitleFont.setPixelSize( caf::FontTools::pointSizeToPixelSize( axisFontSize ) );
+        text.setFont( axisTitleFont );
         this->setAxisTitle( axis, text );
 
         QFont valuesFont = this->axisFont( axis );
-        valuesFont.setPixelSize( font.pixelSize() );
+        valuesFont.setPixelSize( axisTitleFont.pixelSize() );
         this->setAxisFont( axis, valuesFont );
     }
 
