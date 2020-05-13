@@ -609,10 +609,14 @@ void RimEclipseCase::computeCachedData()
         {
             auto task = pInf.task( "Calculating faults", 17 );
 
-            bool computeNncs = RiaApplication::instance()->preferences()->readerSettings()->importNNCs();
+            bool computeFaults = RiaApplication::instance()->preferences()->readerSettings()->importFaults();
+            if ( computeFaults )
+            {
+                bool computeNncs = RiaApplication::instance()->preferences()->readerSettings()->importNNCs();
 
-            rigEclipseCase->mainGrid()->calculateFaults( rigEclipseCase->activeCellInfo( RiaDefines::MATRIX_MODEL ),
-                                                         computeNncs );
+                rigEclipseCase->mainGrid()->calculateFaults( rigEclipseCase->activeCellInfo( RiaDefines::MATRIX_MODEL ),
+                                                             computeNncs );
+            }
         }
 
         {

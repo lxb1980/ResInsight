@@ -131,10 +131,13 @@ RigMainGrid* RimEclipseCaseCollection::registerCaseInGridCollection( RigEclipseC
         // This is the first insertion of this grid, compute cached data
         rigEclipseCase->mainGrid()->computeCachedData();
 
-        bool computeNncs = RiaApplication::instance()->preferences()->readerSettings()->importNNCs();
-
-        rigEclipseCase->mainGrid()->calculateFaults( rigEclipseCase->activeCellInfo( RiaDefines::MATRIX_MODEL ),
-                                                     computeNncs );
+        bool computeFaults = RiaApplication::instance()->preferences()->readerSettings()->importFaults();
+        if ( computeFaults )
+        {
+            bool computeNncs = RiaApplication::instance()->preferences()->readerSettings()->importNNCs();
+            rigEclipseCase->mainGrid()->calculateFaults( rigEclipseCase->activeCellInfo( RiaDefines::MATRIX_MODEL ),
+                                                         computeNncs );
+        }
 
         equalGrid = rigEclipseCase->mainGrid();
     }
