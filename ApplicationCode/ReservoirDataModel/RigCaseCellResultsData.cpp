@@ -3023,6 +3023,14 @@ void RigCaseCellResultsData::computeAllanResults( RigCaseCellResultsData* cellRe
     if ( cellResultsData && cellResultsData->activeFormationNames() &&
          !cellResultsData->activeFormationNames()->formationNames().empty() )
     {
+        // If import of NNC is disabled in preferences, we must make ensure that computed NNC connections are in place
+        if ( mainGrid->nncData()->nativeConnectionCount() == mainGrid->nncData()->connections().size() )
+        {
+            bool computeNncs = true;
+            mainGrid->nncData()->computeCompleteSetOfNncs( mainGrid );
+            mainGrid->distributeNNCsToFaults();
+        }
+
         auto fnNamesResAddr =
             RigEclipseResultAddress( RiaDefines::FORMATION_NAMES, RiaDefines::activeFormationNamesResultName() );
         auto fnAllanResultResAddr =
