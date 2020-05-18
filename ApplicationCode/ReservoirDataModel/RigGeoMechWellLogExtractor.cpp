@@ -316,9 +316,9 @@ std::vector<RigGeoMechWellLogExtractor::WbsParameterSource>
             {
                 if ( !lasFileValues.empty() )
                 {
-                    double lasValue         = getWellLogIntersectionValue( intersectionIdx, lasFileValues );
-		    // Only accept las-values for reservoir if the result is PP Reservoir
-                    bool   invalidLasRegion = isPPResResult && intersectionIdx < gridValues.size() &&
+                    double lasValue = getWellLogIntersectionValue( intersectionIdx, lasFileValues );
+                    // Only accept las-values for reservoir if the result is PP Reservoir
+                    bool invalidLasRegion = isPPResResult && intersectionIdx < static_cast<int64_t>( gridValues.size() ) &&
                                             gridValues[intersectionIdx] != std::numeric_limits<double>::infinity();
                     if ( lasValue != std::numeric_limits<double>::infinity() && !invalidLasRegion )
                     {
