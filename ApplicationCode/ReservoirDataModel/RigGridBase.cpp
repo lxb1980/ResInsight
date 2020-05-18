@@ -226,7 +226,6 @@ void RigGridBase::ijkFromCellIndexNonGuarded( size_t cellIndex, size_t* i, size_
 
     size_t cellCountI = m_gridPointDimensions[0] - 1;
     size_t cellCountJ = m_gridPointDimensions[1] - 1;
-    size_t cellCountK = m_gridPointDimensions[2] - 1;
 
     *k = index / ( cellCountI * cellCountJ );
     index -= ( *k ) * ( cellCountI * cellCountJ );
