@@ -179,10 +179,10 @@ bool RicDeleteItemFeature::isCommandEnabled()
 
     for ( caf::PdmUiItem* item : items )
     {
-        if ( !isDeletable( item ) ) return false;
-
         caf::PdmObject* currentPdmObject = dynamic_cast<caf::PdmObject*>( item );
         if ( !currentPdmObject ) return false;
+
+        if ( !currentPdmObject->isDeletable() ) return false;
 
         caf::PdmChildArrayFieldHandle* childArrayFieldHandle =
             dynamic_cast<caf::PdmChildArrayFieldHandle*>( currentPdmObject->parentField() );
@@ -203,10 +203,10 @@ void RicDeleteItemFeature::onActionTriggered( bool isChecked )
 
     for ( caf::PdmUiItem* item : items )
     {
-        if ( !isDeletable( item ) ) continue;
-
         caf::PdmObject* currentPdmObject = dynamic_cast<caf::PdmObject*>( item );
         if ( !currentPdmObject ) continue;
+
+        if ( !currentPdmObject->isDeletable() ) continue;
 
         caf::PdmChildArrayFieldHandle* childArrayFieldHandle =
             dynamic_cast<caf::PdmChildArrayFieldHandle*>( currentPdmObject->parentField() );

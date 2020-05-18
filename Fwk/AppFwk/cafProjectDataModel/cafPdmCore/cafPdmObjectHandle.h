@@ -16,6 +16,7 @@ class PdmObjectCapability;
 class PdmFieldHandle;
 class PdmUiObjectHandle;
 class PdmXmlObjectHandle;
+class PdmChildArrayFieldHandle;
 
 //==================================================================================================
 /// The base class of all objects
@@ -23,7 +24,7 @@ class PdmXmlObjectHandle;
 class PdmObjectHandle
 {
 public:
-    PdmObjectHandle()           { m_parentField = nullptr;  }
+    PdmObjectHandle();
     virtual ~PdmObjectHandle();
 
     static QString classKeywordStatic();  // For PdmXmlFieldCap to be able to handle fields of PdmObjectHandle directly
@@ -85,6 +86,10 @@ public:
     PdmUiObjectHandle*  uiCapability() const;     // Implementation is in cafPdmUiObjectHandle.cpp
     PdmXmlObjectHandle* xmlCapability() const;    // Implementation is in cafPdmXmlObjectHandle.cpp
 
+    virtual void setDeletable(bool isDeletable);
+    virtual bool isDeletable() const;
+    virtual void onChildDeleted(PdmChildArrayFieldHandle* childArray);
+
 protected: 
     void addField(PdmFieldHandle* field, const QString& keyword);
 
@@ -119,6 +124,8 @@ private:
     // Support system for PdmPointer
     friend class PdmPointerImpl;
     std::set<PdmObjectHandle**>         m_pointersReferencingMe;
+
+    bool m_isDeletable;
 };
 }
 

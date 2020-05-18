@@ -101,6 +101,7 @@ void RicDeleteItemExec::redo()
 
         caf::PdmObjectHandle* parentObj = listField->ownerObject();
         parentObj->uiCapability()->updateConnectedEditors();
+        parentObj->onChildDeleted( listField );
 
         Rim3dView* view = nullptr;
         parentObj->firstAncestorOrThisOfType( view );
