@@ -533,7 +533,11 @@ void RigMainGrid::addUnNamedFaultFaces( int                               gcIdx,
                 firstNO_FAULTFaceForCell = false;
             }
 
-            hostGrid->cellIJKNeighborUnguarded( i, j, k, face, &neighborGridCellIdx );
+            //hostGrid->cellIJKNeighborUnguarded( i, j, k, face, &neighborGridCellIdx );
+            if ( !hostGrid->cellIJKNeighbor( i, j, k, face, &neighborGridCellIdx ) ) 
+            {
+                continue;
+            }
 
             neighborReservoirCellIdx = hostGrid->reservoirCellIndex( neighborGridCellIdx );
             if ( neighborReservoirCellIdx >= m_cells.size() || m_cells[neighborReservoirCellIdx].isInvalid() )
